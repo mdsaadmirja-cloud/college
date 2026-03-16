@@ -282,4 +282,20 @@ body.sidebar-collapsed .sidebar a i {
         justify-content: flex-start;
         padding: 13px 20px;
     }
+.admin-menu-btn {
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.dropdown-menu {
+    min-width: 170px;
+    border-radius: 12px;
+    padding: 8px 0;
+}
+
+.dropdown-item {
+    padding: 10px 16px;
+}
 }

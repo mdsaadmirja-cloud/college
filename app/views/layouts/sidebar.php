@@ -70,9 +70,32 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                 </div>
             </div>
 
-            <div>
-                <span class="badge bg-dark"><?= htmlspecialchars($_SESSION['role'] ?? 'User') ?></span>
-            </div>
+           <div class="dropdown">
+                <button 
+                    class="btn btn-dark dropdown-toggle admin-menu-btn" 
+                    type="button" 
+                    id="adminDropdown" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                >
+                    <?= htmlspecialchars($_SESSION['role'] ?? 'User') ?>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                    <li>
+                        <a class="dropdown-item" href="/college/public/index.php?url=profile">
+                            <i class="bi bi-person-circle me-2"></i> Profile
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="/college/public/index.php?url=logout">
+                            <i class="bi bi-box-arrow-right me-2"></i> Logout
+                        </a>
+                    </li>
+            </a>
+        </li>
+    </ul>
+</div>
         </div>
 
         <main class="page-content">
