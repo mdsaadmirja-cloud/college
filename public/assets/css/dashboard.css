@@ -299,3 +299,58 @@ body.sidebar-collapsed .sidebar a i {
     padding: 10px 16px;
 }
 }
+.menu-group {
+    width: 100%;
+}
+
+.menu-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.menu-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.submenu-arrow {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.submenu-arrow.rotate {
+    transform: rotate(180deg);
+}
+
+.submenu-items {
+    display: none;
+    margin-left: 18px;
+    margin-top: 6px;
+}
+
+.submenu-items.show {
+    display: block;
+}
+
+.submenu-items a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 15px;
+}
+
+.submenu-items a.active {
+    background: rgba(255,255,255,0.12);
+}
+.submenu-items {
+    display: none;
+}

@@ -35,7 +35,28 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
             <a href="#"><i class="bi bi-cash-stack"></i><span class="link-text">Fees</span></a>
             <a href="#"><i class="bi bi-card-checklist"></i><span class="link-text">Results</span></a>
             <a href="#"><i class="bi bi-clock-history"></i><span class="link-text">Timetable</span></a>
-            <a href="#"><i class="bi bi-bar-chart-fill"></i><span class="link-text">Reports</span></a>
+            <?php $reportsOpen = ($currentPage === 'student-performance'); ?>
+
+            <div class="menu-group">
+                <a href="javascript:void(0);" 
+                    class="menu-toggle <?= $reportsOpen ? 'active' : '' ?>" 
+                    onclick="toggleReportsMenu(event)">
+                    <span class="menu-left">
+                        <i class="bi bi-bar-chart-fill"></i>
+                        <span class="link-text">Reports</span>
+                    </span>
+                    <i class="bi bi-chevron-down submenu-arrow <?= $reportsOpen ? 'rotate' : '' ?>" id="reportsArrow"></i>
+                </a>
+
+                <div class="submenu-items <?= $reportsOpen ? 'show' : '' ?>" id="reportsSubmenu">
+                    <a href="/college/public/index.php?url=student-performance"
+                        class="<?= $currentPage === 'student-performance' ? 'active' : '' ?>">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        <span class="link-text">Student Performance Tracking</span>
+                    </a>
+                </div>
+            </div>
+
             <a href="#"><i class="bi bi-gear-fill"></i><span class="link-text">Settings</span></a>
         <?php elseif ($role === 'faculty'): ?>
             <a href="#"><i class="bi bi-calendar-check-fill"></i><span class="link-text">Attendance</span></a>
@@ -92,10 +113,11 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                             <i class="bi bi-box-arrow-right me-2"></i> Logout
                         </a>
                     </li>
-            </a>
-        </li>
+            
+        
     </ul>
 </div>
         </div>
 
         <main class="page-content">
+            

@@ -9,6 +9,8 @@ require_once __DIR__ . '/../app/services/MailService.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/AdminController.php';
 require_once __DIR__ . '/../app/controllers/ProfileController.php';
+require_once __DIR__ . '/../app/models/StudentPerformanceModel.php';
+require_once __DIR__ . '/../app/controllers/StudentPerformanceController.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -98,6 +100,22 @@ switch ($url) {
         $users = $admin->getUsersByRole('Faculty');
         include __DIR__ . '/../app/views/admin/faculty.php';
         break;
+    case 'reports':
+        if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'admin') {
+            redirectTo('login');
+        }
+
+        include __DIR__ . '/../app/views/admin/reports.php';
+        break;
+
+    case 'student-performance':
+    if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'admin') {
+        redirectTo('login');
+    }
+
+    $performanceController = new StudentPerformanceController($db);
+    $performanceController->dashboard();
+    break; 
 
     case 'create-user':
         if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'admin') {

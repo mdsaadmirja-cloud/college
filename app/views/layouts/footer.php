@@ -21,5 +21,16 @@
         });
     }
 </script>
+<script>
+function toggleReportsMenu(event) {
+    event.preventDefault();
+
+    const submenu = document.getElementById('reportsSubmenu');
+    const arrow = document.getElementById('reportsArrow');
+
+    submenu.classList.toggle('show');
+    arrow.classList.toggle('rotate');
+}
+</script>
 </body>
 </html>
