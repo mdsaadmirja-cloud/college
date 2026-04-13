@@ -40,17 +40,28 @@ include __DIR__ . '/../layouts/sidebar.php';
 
                         <div class="mb-3">
                             <label class="form-label">First Name</label>
-                            <input type="text" name="first_name" class="form-control" required>
+                            <input type="text" name="first_name" class="form-control"
+                                pattern="[A-Za-z ]+"
+                                title="Only letters allowed"
+                                oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
+                                required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Last Name</label>
-                            <input type="text" name="last_name" class="form-control">
+                            <input type="text" name="last_name" class="form-control"
+                                pattern="[A-Za-z ]+"
+                                oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
+                                title="Only letters allowed">
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Phone</label>
-                            <input type="text" name="phone" class="form-control">
+                            <input type="tel" name="phone" class="form-control"
+                                pattern="[0-9]{10}"
+                                maxlength="10"
+                                Oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                title="Enter exactly 10 digits">
                         </div>
 
                         <div class="mb-3">
@@ -60,12 +71,28 @@ include __DIR__ . '/../layouts/sidebar.php';
 
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="text" name="password" class="form-control" required>
+                            <input type="password" name="password" class="form-control"
+                                pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}"
+                                title="Must contain 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character"
+                                required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Department</label>
-                            <input type="text" name="department" class="form-control">
+                            <select name="department" class="form-control" required>
+                                <option value="">Select Department</option>
+                                <option value="Computer Science">Computer Science</option>
+                                <option value="BCA">BCA</option>
+                                <option value="BBA">BBA</option>
+                                <option value="Commerce">Commerce</option>
+                                <option value="Science">Science</option>
+                            </select>
+
+                            <!-- Optional manual entry -->
+                            <input type="text" name="department_custom" class="form-control mt-2"
+                                placeholder="Or enter manually"
+                                pattern="[A-Za-z ]+"
+                                title="Only letters allowed">
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">Create Student</button>

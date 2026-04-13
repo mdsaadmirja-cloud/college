@@ -10,25 +10,24 @@ class StudentPerformanceModel
     }
 
     public function getStudentOverview($studentId)
-    {
-        $sql = "
-            SELECT 
-                s.id,
-                s.name,
-                s.roll_no,
-                COUNT(DISTINCT m.subject_id) AS total_subjects,
-                COUNT(DISTINCT m.exam_id) AS total_exams,
-                ROUND(AVG(m.marks_obtained), 2) AS avg_marks
-            FROM students s
-            LEFT JOIN marks m ON s.id = m.student_id
-            WHERE s.id = ?
-            GROUP BY s.id
-        ";
+{
+    $sql = "
+        SELECT 
+            s.id,
+            s.candidate_name,
+            COUNT(DISTINCT m.subject_id) AS total_subjects,
+            COUNT(DISTINCT m.exam_id) AS total_exams,
+            ROUND(AVG(m.marks_obtained), 2) AS avg_marks
+        FROM students s
+        LEFT JOIN marks m ON s.id = m.student_id
+        WHERE s.id = ?
+        GROUP BY s.id
+    ";
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$studentId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    $stmt = $this->conn->prepare($sql);
+    $stmt->execute([$studentId]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
     public function getAttendancePercentage($studentId)
     {

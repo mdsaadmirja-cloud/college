@@ -1,26 +1,32 @@
 <?php
-class AdminController {
+class AdminController
+{
     private $userModel;
     private $mailService;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->userModel = new UserModel($db);
         $this->mailService = new MailService();
     }
 
-    public function getAllUsers() {
+    public function getAllUsers()
+    {
         return $this->userModel->getAllUsers();
     }
 
-    public function getUsersByRole($roleName) {
+    public function getUsersByRole($roleName)
+    {
         return $this->userModel->getUsersByRole($roleName);
     }
 
-    public function getUserById($id) {
+    public function getUserById($id)
+    {
         return $this->userModel->getUserById($id);
     }
 
-    public function createUser() {
+    public function createUser()
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'dashboard');
             exit();
@@ -35,7 +41,45 @@ class AdminController {
         $roleId     = (int)($_POST['role_id'] ?? 0);
         $redirect   = trim($_POST['redirect_to'] ?? 'dashboard');
 
-        if ($firstName === '' || $email === '' || $password === '' || !in_array($roleId, [2, 3], true)) {
+        // First Name
+        // First Name
+        if (!preg_match("/^[A-Za-z ]+$/", $firstName)) {
+            header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
+            exit();
+        }
+
+        // Last Name
+        if (!empty($lastName) && !preg_match("/^[A-Za-z ]+$/", $lastName)) {
+            header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
+            exit();
+        }
+
+        // Phone
+        if (!empty($phone) && !preg_match("/^[0-9]{10}$/", $phone)) {
+            header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
+            exit();
+        }
+
+        // Email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
+            exit();
+        }
+
+        // Password
+        if (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/", $password)) {
+            header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
+            exit();
+        }
+
+        // Department (manual)
+        if (
+            !empty($_POST['department_custom']) &&
+            !preg_match("/^[A-Za-z ]+$/", $_POST['department_custom'])
+        ) {
+            header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
+            exit();
+        } {
             header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
             exit();
         }
@@ -74,7 +118,8 @@ class AdminController {
         exit();
     }
 
-    public function updateUser() {
+    public function updateUser()
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'dashboard');
             exit();
@@ -107,7 +152,8 @@ class AdminController {
         exit();
     }
 
-    public function deleteUser() {
+    public function deleteUser()
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'dashboard');
             exit();
