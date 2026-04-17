@@ -87,12 +87,6 @@ include __DIR__ . '/../layouts/sidebar.php';
                                 <option value="Commerce">Commerce</option>
                                 <option value="Science">Science</option>
                             </select>
-
-                            <!-- Optional manual entry -->
-                            <input type="text" name="department_custom" class="form-control mt-2"
-                                placeholder="Or enter manually"
-                                pattern="[A-Za-z ]+"
-                                title="Only letters allowed">
                         </div>
 
                         <button type="submit" class="btn btn-primary w-100">Create Student</button>

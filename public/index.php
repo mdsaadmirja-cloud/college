@@ -28,30 +28,33 @@ switch ($url) {
         break;
 
     case 'login':
-        $userModel = new UserModel($db);
-        $allowAdminRegister = !$userModel->adminExists();
-        include __DIR__ . '/../app/views/auth/login.php';
-        break;
-
-    case 'register-admin':
-        $userModel = new UserModel($db);
-
-        if ($userModel->adminExists()) {
-            redirectTo('login&error=admin_registration_closed');
-        }
-
-        include __DIR__ . '/../app/views/auth/register_admin.php';
-        break;
-
-    case 'register-admin-process':
-        $auth = new AuthController($db);
-        $auth->registerAdmin();
-        break;
-
-    case 'login-process':
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $auth = new AuthController($db);
         $auth->login();
         break;
+    }
+
+    $userModel = new UserModel($db);
+    $allowAdminRegister = !$userModel->adminExists();
+
+    include __DIR__ . '/../app/views/auth/login.php';
+    break;
+
+    case 'register-admin':
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $auth = new AuthController($db);
+        $auth->registerAdmin();
+        break;
+    }
+
+    $userModel = new UserModel($db);
+
+    if ($userModel->adminExists()) {
+        redirectTo('login&error=admin_registration_closed');
+    }
+
+    include __DIR__ . '/../app/views/auth/register_admin.php';
+    break;
 
     case 'dashboard':
         if (!isset($_SESSION['user_id'])) {

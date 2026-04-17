@@ -43,7 +43,7 @@ class AdminController
 
         // First Name
         // First Name
-        if (!preg_match("/^[A-Za-z ]+$/", $firstName)) {
+        if (!empty($firstName) && !preg_match("/^[A-Za-z ]+$/", $firstName)) {
             header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
             exit();
         }
@@ -72,14 +72,11 @@ class AdminController
             exit();
         }
 
-        // Department (manual)
+        // Department validation (only if custom field exists)
         if (
             !empty($_POST['department_custom']) &&
             !preg_match("/^[A-Za-z ]+$/", $_POST['department_custom'])
         ) {
-            header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
-            exit();
-        } {
             header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
             exit();
         }

@@ -33,7 +33,7 @@
             <div class="alert alert-danger">Admin registration failed. Email may already exist.</div>
         <?php endif; ?>
 
-        <form action="/college/public/index.php?url=register-admin-process" method="POST">
+        <form action="/college/public/index.php?url=register-admin" method="POST">
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">First Name</label>

@@ -21,6 +21,7 @@
         <h3 class="portal-heading text-center">Login to College CMS</h3>
         <p class="portal-subtext text-center">Use your account credentials to continue.</p>
 
+        <!-- EXISTING ERRORS -->
         <?php if (isset($_GET['error']) && $_GET['error'] === 'invalid_credentials'): ?>
             <div class="alert alert-danger">Invalid email or password.</div>
         <?php endif; ?>
@@ -37,15 +38,31 @@
             <div class="alert alert-success">Admin account created successfully. Please login.</div>
         <?php endif; ?>
 
-        <form action="/college/public/index.php?url=login-process" method="POST">
+        <!-- NEW BACKEND VALIDATION ERRORS -->
+        <?php if (isset($_GET['error']) && $_GET['error'] === 'invalid_email'): ?>
+            <div class="alert alert-danger">Your email should be like example@gmail.com</div>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['error']) && $_GET['error'] === 'invalid_password'): ?>
+            <div class="alert alert-danger">
+                Password must be exactly 8 characters with uppercase, lowercase, number & special character
+            </div>
+        <?php endif; ?>
+
+        <form action="/college/public/index.php?url=login" method="POST">
+
+            <!-- EMAIL -->
             <div class="mb-3">
                 <label class="form-label">Email / Login ID</label>
-                <input type="email" name="email" class="form-control" required>
+                <input type="email" name="email" id="email" class="form-control" required>
+                <small id="emailError" class="text-danger"></small>
             </div>
 
+            <!-- PASSWORD -->
             <div class="mb-3">
                 <label class="form-label">Password</label>
-                <input type="password" name="password" class="form-control" required>
+                <input type="password" name="password" id="password" class="form-control" required>
+                <small id="passwordError" class="text-danger"></small>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Login</button>
@@ -59,6 +76,36 @@
         <?php endif; ?>
     </div>
 </section>
+
+<!-- JAVASCRIPT VALIDATION -->
+<script>
+document.getElementById("email").addEventListener("blur", function () {
+    const email = this.value;
+    const emailError = document.getElementById("emailError");
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailPattern.test(email)) {
+        emailError.innerText = "Your email should be like example@gmail.com";
+    } else {
+        emailError.innerText = "";
+        document.getElementById("password").focus();
+    }
+});
+
+document.getElementById("password").addEventListener("input", function () {
+    const password = this.value;
+    const passwordError = document.getElementById("passwordError");
+
+    const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8}$/;
+
+    if (!pattern.test(password)) {
+        passwordError.innerText = "Password must be exactly 8 chars with uppercase, lowercase, number & special character";
+    } else {
+        passwordError.innerText = "";
+    }
+});
+</script>
 
 </body>
 </html>
