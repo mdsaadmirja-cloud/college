@@ -1,29 +1,42 @@
-/* ===== Public Pages: Home + Login ===== */
+/* ===== Public Pages: Home + Login - The Obsidian Forest Palette ===== */
 
 :root {
-    --brand-primary: #0d6efd;
-    --brand-primary-dark: #0b5ed7;
-    --brand-dark: #1f2937;
-    --brand-muted: #6b7280;
-    --brand-light: #f4f7fb;
-    --brand-card: #ffffff;
-    --brand-warning-bg: #fff3cd;
-    --brand-warning-border: #ffc107;
-    --radius-lg: 18px;
-    --radius-md: 14px;
-    --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
-    --shadow-card: 0 6px 18px rgba(0, 0, 0, 0.06);
+    /* Brand Colors - Unique Obsidian & Gold */
+    --brand-primary: #1A4D2E;           /* Hunter Green */
+    --brand-primary-dark: #062C22;      /* Obsidian Green */
+    --brand-accent: #D4AF37;            /* Champagne Gold */
+    --brand-dark: #051A14;              /* Deepest Forest Black */
+    --brand-muted: #5F6F65;             /* Moss Grey */
+    --brand-light: #FBFBF8;             /* Parchment Background */
+    --brand-card: #ffffff;              /* Pure White for cards */
+    
+    /* Warning/Contact Colors - Muted Terracotta */
+    --brand-warning-bg: #FCF5F2;        
+    --brand-warning-border: #BC6C25;    
+    
+    /* Geometry & Style Logic */
+    --radius-lg: 24px;                  /* Modern, high-end rounded corners */
+    --radius-md: 12px;
+    --shadow-soft: 0 12px 40px rgba(6, 44, 34, 0.08);
+    --shadow-card: 0 8px 20px rgba(6, 44, 34, 0.06);
 }
 
 body {
     background: var(--brand-light);
-    color: #1f2937;
+    color: var(--brand-dark);
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .navbar-brand {
     font-weight: 700;
     letter-spacing: 0.2px;
+    color: var(--brand-accent) !important; /* Gold Branding */
+}
+
+/* Navbar Logic: Solid Obsidian with Gold border */
+.navbar.bg-dark {
+    background-color: var(--brand-primary-dark) !important;
+    border-bottom: 2px solid var(--brand-accent);
 }
 
 .hero-section {
@@ -31,9 +44,9 @@ body {
     display: flex;
     align-items: center;
     background:
-        radial-gradient(circle at top right, rgba(255,255,255,0.18), transparent 25%),
+        radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), transparent 25%),
         linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
-    color: #fff;
+    color: #FBFBF8;
 }
 
 .hero-title {
@@ -45,7 +58,7 @@ body {
 .hero-subtitle {
     font-size: 1.1rem;
     max-width: 650px;
-    opacity: 0.95;
+    color: #A9BBAF; /* Moss Tint */
 }
 
 .hero-card,
@@ -63,29 +76,33 @@ body {
     box-shadow: var(--shadow-card);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     height: 100%;
+    border: 1px solid #E9EDEA;
 }
 
 .feature-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px rgba(0,0,0,0.08);
+    transform: translateY(-6px);
+    box-shadow: 0 15px 30px rgba(6, 44, 34, 0.1);
+    border-color: var(--brand-accent);
 }
 
 .feature-icon {
     width: 54px;
     height: 54px;
-    border-radius: 14px;
+    border-radius: 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(13, 110, 253, 0.1);
-    color: var(--brand-primary);
+    background: rgba(212, 175, 55, 0.1); /* Gold Tint */
+    color: var(--brand-accent);
     font-size: 1.4rem;
     margin-bottom: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 .section-title {
     font-weight: 700;
     margin-bottom: 10px;
+    color: var(--brand-primary-dark);
 }
 
 .section-subtitle {
@@ -101,7 +118,7 @@ body {
 
 .developer-item {
     padding: 14px 0;
-    border-bottom: 1px solid #eef1f5;
+    border-bottom: 1px solid #EEF1F0;
 }
 
 .developer-item:last-child {
@@ -125,6 +142,7 @@ body {
 
 .warning-title {
     font-weight: 700;
+    color: var(--brand-warning-border);
 }
 
 .portal-wrapper {
@@ -134,14 +152,15 @@ body {
     justify-content: center;
     padding: 28px 0;
     background:
-        radial-gradient(circle at top left, rgba(13,110,253,0.10), transparent 30%),
-        linear-gradient(180deg, #f8fbff 0%, #eef3f9 100%);
+        radial-gradient(circle at top left, rgba(26, 77, 46, 0.08), transparent 30%),
+        linear-gradient(180deg, #FBFBF8 0%, #F1F4F1 100%);
 }
 
 .portal-card {
     width: 100%;
     max-width: 460px;
     padding: 34px;
+    border: 1px solid #E9EDEA;
 }
 
 .portal-card.register-card {
@@ -151,6 +170,7 @@ body {
 .portal-heading {
     font-weight: 700;
     margin-bottom: 6px;
+    color: var(--brand-primary-dark);
 }
 
 .portal-subtext {
@@ -162,32 +182,64 @@ body {
 .form-select {
     border-radius: 12px;
     padding: 12px 14px;
-    border: 1px solid #d7dce3;
+    border: 1px solid #D7DCE3;
 }
 
 .form-control:focus,
 .form-select:focus {
-    box-shadow: 0 0 0 0.2rem rgba(13,110,253,0.15);
-    border-color: rgba(13,110,253,0.45);
+    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.15);
+    border-color: var(--brand-accent);
 }
 
 .btn {
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+
+/* Primary buttons become Forest Green */
+.btn-primary {
+    background-color: var(--brand-primary);
+    border-color: var(--brand-primary);
+}
+
+.btn-primary:hover {
+    background-color: var(--brand-primary-dark);
+    border-color: var(--brand-primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Hero "Login" button becomes Champagne Gold */
+.btn-light {
+    background-color: var(--brand-accent);
+    border-color: var(--brand-accent);
+    color: var(--brand-primary-dark);
+}
+
+.btn-light:hover {
+    background-color: #C19A2E;
+    border-color: #C19A2E;
+    color: #fff;
 }
 
 .btn-hero {
     padding: 12px 22px;
 }
 
-.portal-links {
-    margin-top: 18px;
-    text-align: center;
+.portal-links a {
+    color: var(--brand-primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.portal-links a:hover {
+    color: var(--brand-accent);
 }
 
 .public-footer {
-    background: #111827;
-    color: #fff;
+    background: #041410; /* Solid Obsidian */
+    color: #A9BBAF;
+    border-top: 1px solid rgba(212, 175, 55, 0.1);
 }
 
 .public-footer small {
@@ -195,22 +247,11 @@ body {
 }
 
 @media (max-width: 992px) {
-    .hero-title {
-        font-size: 2.4rem;
-    }
+    .hero-title { font-size: 2.4rem; }
 }
 
 @media (max-width: 768px) {
-    .hero-section {
-        min-height: auto;
-        padding: 60px 0;
-    }
-
-    .hero-title {
-        font-size: 2rem;
-    }
-
-    .portal-card {
-        padding: 24px;
-    }
+    .hero-section { min-height: auto; padding: 60px 0; }
+    .hero-title { font-size: 2rem; }
+    .portal-card { padding: 24px; }
 }
