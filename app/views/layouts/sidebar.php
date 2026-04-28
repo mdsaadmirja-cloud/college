@@ -38,14 +38,13 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
             <?php $reportsOpen = ($currentPage === 'student-performance'); ?>
 
             <div class="menu-group">
-                <a href="javascript:void(0);" 
-                    class="menu-toggle <?= $reportsOpen ? 'active' : '' ?>" 
+                <a href="javascript:void(0);"
+                    class="menu-toggle <?= $reportsOpen ? 'active' : '' ?>"
                     onclick="toggleReportsMenu(event)">
                     <span class="menu-left">
                         <i class="bi bi-bar-chart-fill"></i>
                         <span class="link-text">Reports</span>
                     </span>
-                    <i class="bi bi-chevron-down submenu-arrow <?= $reportsOpen ? 'rotate' : '' ?>" id="reportsArrow"></i>
                 </a>
 
                 <div class="submenu-items <?= $reportsOpen ? 'show' : '' ?>" id="reportsSubmenu">
@@ -56,7 +55,6 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                     </a>
                 </div>
             </div>
-
             <a href="#"><i class="bi bi-gear-fill"></i><span class="link-text">Settings</span></a>
         <?php elseif ($role === 'faculty'): ?>
             <a href="#"><i class="bi bi-calendar-check-fill"></i><span class="link-text">Attendance</span></a>
@@ -91,14 +89,13 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                 </div>
             </div>
 
-           <div class="dropdown">
-                <button 
-                    class="btn btn-dark dropdown-toggle admin-menu-btn" 
-                    type="button" 
-                    id="adminDropdown" 
-                    data-bs-toggle="dropdown" 
-                    aria-expanded="false"
-                >
+            <div class="dropdown">
+                <button
+                    class="btn btn-dark dropdown-toggle admin-menu-btn"
+                    type="button"
+                    id="adminDropdown"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
                     <?= htmlspecialchars($_SESSION['role'] ?? 'User') ?>
                 </button>
 
@@ -113,11 +110,10 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                             <i class="bi bi-box-arrow-right me-2"></i> Logout
                         </a>
                     </li>
-            
-        
-    </ul>
-</div>
+
+
+                </ul>
+            </div>
         </div>
 
         <main class="page-content">
-            
