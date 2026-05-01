@@ -1,18 +1,22 @@
 <?php
-class UserModel {
+class UserModel
+{
     private $conn;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->conn = $db;
     }
 
-    public function authenticate($email, $password) {
+    public function authenticate($email, $password)
+    {
         $query = "SELECT
                     u.id,
                     u.uuid,
                     u.email,
                     u.password_hash,
                     u.role_id,
+                    u.student_id,
                     u.status,
                     u.last_login,
                     u.created_at,
@@ -52,7 +56,8 @@ class UserModel {
         return false;
     }
 
-    public function emailExists($email, $excludeId = null) {
+    public function emailExists($email, $excludeId = null)
+    {
         $query = "SELECT id FROM users WHERE email = :email";
         if ($excludeId !== null) {
             $query .= " AND id != :exclude_id";
@@ -70,7 +75,8 @@ class UserModel {
         return $stmt->fetch(PDO::FETCH_ASSOC) ? true : false;
     }
 
-    public function getRoleNameById($roleId) {
+    public function getRoleNameById($roleId)
+    {
         $query = "SELECT role_name FROM roles WHERE id = :id LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $roleId, PDO::PARAM_INT);
@@ -80,7 +86,8 @@ class UserModel {
         return $row ? $row['role_name'] : null;
     }
 
-    public function createUser($firstName, $lastName, $email, $password, $roleId, $department, $phone = null) {
+    public function createUser($firstName, $lastName, $email, $password, $roleId, $department, $phone = null)
+    {
         if ($this->emailExists($email)) {
             return false;
         }
@@ -159,7 +166,8 @@ class UserModel {
         }
     }
 
-    public function getAllUsers() {
+    public function getAllUsers()
+    {
         $query = "SELECT
                     u.id,
                     u.email,
@@ -180,7 +188,8 @@ class UserModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getUsersByRole($roleName) {
+    public function getUsersByRole($roleName)
+    {
         $query = "SELECT
                     u.id,
                     u.email,
@@ -203,7 +212,8 @@ class UserModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getUserById($id) {
+    public function getUserById($id)
+    {
         $query = "SELECT
                     u.id,
                     u.email,
@@ -227,7 +237,8 @@ class UserModel {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function updateUser($id, $firstName, $lastName, $phone, $email, $department, $status) {
+    public function updateUser($id, $firstName, $lastName, $phone, $email, $department, $status)
+    {
         if ($this->emailExists($email, $id)) {
             return false;
         }
@@ -270,60 +281,66 @@ class UserModel {
         }
     }
 
-    public function deleteUser($id) {
+    public function deleteUser($id)
+    {
         $query = "DELETE FROM users WHERE id = :id AND role_id IN (2, 3)";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
         return $stmt->execute();
     }
-    public function adminExists() {
-    $query = "SELECT COUNT(*) AS total
+    public function adminExists()
+    {
+        $query = "SELECT COUNT(*) AS total
               FROM users u
               JOIN roles r ON u.role_id = r.id
               WHERE r.role_name = 'Admin'";
 
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return ((int)($row['total'] ?? 0)) > 0;
-}
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return ((int)($row['total'] ?? 0)) > 0;
+    }
 
-    public function countAllUsers() {
-    $query = "SELECT COUNT(*) AS total FROM users";
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return (int)($row['total'] ?? 0);
-}
+    public function countAllUsers()
+    {
+        $query = "SELECT COUNT(*) AS total FROM users";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($row['total'] ?? 0);
+    }
 
-public function countUsersByRole($roleName) {
-    $query = "SELECT COUNT(*) AS total
+    public function countUsersByRole($roleName)
+    {
+        $query = "SELECT COUNT(*) AS total
               FROM users u
               JOIN roles r ON u.role_id = r.id
               WHERE r.role_name = :role_name";
 
-    $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':role_name', $roleName, PDO::PARAM_STR);
-    $stmt->execute();
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':role_name', $roleName, PDO::PARAM_STR);
+        $stmt->execute();
 
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return (int)($row['total'] ?? 0);
-}
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($row['total'] ?? 0);
+    }
 
-public function countActiveUsers() {
-    $query = "SELECT COUNT(*) AS total FROM users WHERE status = 'active'";
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return (int)($row['total'] ?? 0);
-}
+    public function countActiveUsers()
+    {
+        $query = "SELECT COUNT(*) AS total FROM users WHERE status = 'active'";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (int)($row['total'] ?? 0);
+    }
 
-public function getRecentUsers($limit = 5) {
-    $limit = (int)$limit;
+    public function getRecentUsers($limit = 5)
+    {
+        $limit = (int)$limit;
 
-    $query = "SELECT
+        $query = "SELECT
                 u.id,
                 u.email,
                 r.role_name,
@@ -335,49 +352,50 @@ public function getRecentUsers($limit = 5) {
               ORDER BY u.created_at DESC
               LIMIT $limit";
 
-    $stmt = $this->conn->prepare($query);
-    $stmt->execute();
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
 
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-public function updateOwnProfile($id, $firstName, $lastName, $phone, $email, $department) {
-    if ($this->emailExists($email, $id)) {
-        return false;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    public function updateOwnProfile($id, $firstName, $lastName, $phone, $email, $department)
+    {
+        if ($this->emailExists($email, $id)) {
+            return false;
+        }
 
-    try {
-        $this->conn->beginTransaction();
+        try {
+            $this->conn->beginTransaction();
 
-        $userQuery = "UPDATE users
+            $userQuery = "UPDATE users
                       SET email = :email,
                           updated_at = NOW()
                       WHERE id = :id";
 
-        $userStmt = $this->conn->prepare($userQuery);
-        $userStmt->bindParam(':email', $email);
-        $userStmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $userStmt->execute();
+            $userStmt = $this->conn->prepare($userQuery);
+            $userStmt->bindParam(':email', $email);
+            $userStmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $userStmt->execute();
 
-        $profileQuery = "UPDATE profiles
+            $profileQuery = "UPDATE profiles
                          SET first_name = :first_name,
                              last_name = :last_name,
                              phone = :phone,
                              department = :department
                          WHERE user_id = :id";
 
-        $profileStmt = $this->conn->prepare($profileQuery);
-        $profileStmt->bindParam(':first_name', $firstName);
-        $profileStmt->bindParam(':last_name', $lastName);
-        $profileStmt->bindParam(':phone', $phone);
-        $profileStmt->bindParam(':department', $department);
-        $profileStmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $profileStmt->execute();
+            $profileStmt = $this->conn->prepare($profileQuery);
+            $profileStmt->bindParam(':first_name', $firstName);
+            $profileStmt->bindParam(':last_name', $lastName);
+            $profileStmt->bindParam(':phone', $phone);
+            $profileStmt->bindParam(':department', $department);
+            $profileStmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $profileStmt->execute();
 
-        $this->conn->commit();
-        return true;
-    } catch (Exception $e) {
-        $this->conn->rollBack();
-        return false;
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return false;
+        }
     }
-}
 }

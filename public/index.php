@@ -15,7 +15,8 @@ require_once __DIR__ . '/../app/controllers/StudentPerformanceController.php';
 $database = new Database();
 $db = $database->getConnection();
 
-function redirectTo($route) {
+function redirectTo($route)
+{
     header('Location: ' . BASE_URL . $route);
     exit();
 }
@@ -28,33 +29,33 @@ switch ($url) {
         break;
 
     case 'login':
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $auth = new AuthController($db);
-        $auth->login();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $auth = new AuthController($db);
+            $auth->login();
+            break;
+        }
+
+        $userModel = new UserModel($db);
+        $allowAdminRegister = !$userModel->adminExists();
+
+        include __DIR__ . '/../app/views/auth/login.php';
         break;
-    }
-
-    $userModel = new UserModel($db);
-    $allowAdminRegister = !$userModel->adminExists();
-
-    include __DIR__ . '/../app/views/auth/login.php';
-    break;
 
     case 'register-admin':
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $auth = new AuthController($db);
-        $auth->registerAdmin();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $auth = new AuthController($db);
+            $auth->registerAdmin();
+            break;
+        }
+
+        $userModel = new UserModel($db);
+
+        if ($userModel->adminExists()) {
+            redirectTo('login&error=admin_registration_closed');
+        }
+
+        include __DIR__ . '/../app/views/auth/register_admin.php';
         break;
-    }
-
-    $userModel = new UserModel($db);
-
-    if ($userModel->adminExists()) {
-        redirectTo('login&error=admin_registration_closed');
-    }
-
-    include __DIR__ . '/../app/views/auth/register_admin.php';
-    break;
 
     case 'dashboard':
         if (!isset($_SESSION['user_id'])) {
@@ -112,13 +113,19 @@ switch ($url) {
         break;
 
     case 'student-performance':
-    if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'admin') {
-        redirectTo('login');
-    }
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
 
-    $performanceController = new StudentPerformanceController($db);
-    $performanceController->dashboard();
-    break; 
+        $role = strtolower($_SESSION['role'] ?? '');
+
+        if (!in_array($role, ['admin', 'faculty', 'student'])) {
+            redirectTo('login');
+        }
+
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->dashboard();
+        break;
 
     case 'create-user':
         if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'admin') {
@@ -135,7 +142,7 @@ switch ($url) {
         }
 
         $admin = new AdminController($db);
-        $user = $admin->getUserById((int)($_GET['id'] ?? 0));
+        $user = $admin->getUserById((int) ($_GET['id'] ?? 0));
         include __DIR__ . '/../app/views/admin/edit_user.php';
         break;
 
@@ -163,7 +170,7 @@ switch ($url) {
         }
 
         $profileController = new ProfileController($db);
-        $user = $profileController->getCurrentUser((int)$_SESSION['user_id']);
+        $user = $profileController->getCurrentUser((int) $_SESSION['user_id']);
         include __DIR__ . '/../app/views/profile/index.php';
         break;
 
@@ -181,6 +188,49 @@ switch ($url) {
         session_destroy();
         redirectTo('home');
         break;
+
+    case 'save-teacher-note':
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role = strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->saveTeacherNote();
+        break;
+    case 'save-student-marks':
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role = strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->saveMarks();
+        break;
+    case 'save-student-attendance':
+    if (!isset($_SESSION['user_id'])) {
+        redirectTo('login');
+    }
+
+    $role = strtolower($_SESSION['role'] ?? '');
+
+    if ($role !== 'faculty') {
+        redirectTo('dashboard');
+    }
+
+    $performanceController = new StudentPerformanceController($db);
+    $performanceController->saveAttendance();
+    break;
 
     default:
         http_response_code(404);

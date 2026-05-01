@@ -57,12 +57,22 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
             </div>
             <a href="#"><i class="bi bi-gear-fill"></i><span class="link-text">Settings</span></a>
         <?php elseif ($role === 'faculty'): ?>
+            <a href="/college/public/index.php?url=student-performance"
+                class="<?= $currentPage === 'student-performance' ? 'active' : '' ?>">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span class="link-text">Student Performance Tracking</span>
+            </a>
             <a href="#"><i class="bi bi-calendar-check-fill"></i><span class="link-text">Attendance</span></a>
             <a href="#"><i class="bi bi-people-fill"></i><span class="link-text">Students</span></a>
             <a href="#"><i class="bi bi-clock-history"></i><span class="link-text">Timetable</span></a>
             <a href="#"><i class="bi bi-journal-text"></i><span class="link-text">Assignments</span></a>
             <a href="#"><i class="bi bi-card-checklist"></i><span class="link-text">Results</span></a>
         <?php elseif ($role === 'student'): ?>
+            <a href="/college/public/index.php?url=student-performance"
+                class="<?= $currentPage === 'student-performance' ? 'active' : '' ?>">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span class="link-text">My Performance</span>
+            </a>
             <a href="#"><i class="bi bi-calendar-check-fill"></i><span class="link-text">Attendance</span></a>
             <a href="#"><i class="bi bi-card-checklist"></i><span class="link-text">Results</span></a>
             <a href="#"><i class="bi bi-clock-history"></i><span class="link-text">Timetable</span></a>

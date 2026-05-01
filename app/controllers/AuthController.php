@@ -1,12 +1,15 @@
 <?php
-class AuthController {
+class AuthController
+{
     private $userModel;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->userModel = new UserModel($db);
     }
 
-    public function login() {
+    public function login()
+    {
         // Allow only POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'login');
@@ -55,13 +58,15 @@ class AuthController {
         $_SESSION['user_name'] = $user['first_name'] ?? 'User';
         $_SESSION['email'] = $user['email'];
         $_SESSION['role'] = $user['role_name'];
+        $_SESSION['student_id'] = $user['student_id'] ?? null;
 
         // ================= REDIRECT =================
         header('Location: ' . BASE_URL . 'dashboard');
         exit();
     }
 
-    public function registerAdmin() {
+    public function registerAdmin()
+    {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: ' . BASE_URL . 'login');
             exit();
