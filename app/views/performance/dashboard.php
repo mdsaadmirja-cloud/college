@@ -1,169 +1,417 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
 <?php
+$pageTitle = 'Student Performance Analytics';
+include __DIR__ . '/../layouts/header.php';
+include __DIR__ . '/../layouts/sidebar.php';
+
 $userRole = strtolower($_SESSION['role'] ?? '');
 ?>
 
 <style>
     :root {
-        --cms-bg: #f4f7fb;
-        --cms-card: #ffffff;
-        --cms-primary: #1e3a8a;
-        --cms-primary-light: #dbeafe;
-        --cms-accent: #4f46e5;
-        --cms-success: #16a34a;
+        --cms-bg: #052017;
+        --cms-bg-dark: #03140f;
+        --cms-card: rgba(5, 32, 23, 0.78);
+        --cms-card-soft: rgba(255, 255, 255, 0.055);
+        --cms-border: rgba(255, 255, 255, 0.11);
+        --cms-gold: #f5c84b;
+        --cms-gold-soft: rgba(245, 200, 75, 0.16);
+        --cms-gold-border: rgba(245, 200, 75, 0.28);
+        --cms-text: #fff8e7;
+        --cms-muted: rgba(255, 248, 231, 0.68);
+        --cms-green: #1dbf73;
+        --cms-success: #22c55e;
         --cms-warning: #f59e0b;
-        --cms-danger: #dc2626;
-        --cms-info: #0284c7;
-        --cms-text: #1f2937;
-        --cms-muted: #6b7280;
-        --cms-border: #e5e7eb;
+        --cms-danger: #dc3545;
+        --cms-info: #38bdf8;
+        --cms-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+        --cms-gold-shadow: 0 18px 45px rgba(245, 200, 75, 0.18);
     }
 
     body {
-        background: var(--cms-bg);
+        background:
+            radial-gradient(circle at 15% 15%, rgba(29, 191, 115, 0.10), transparent 30%),
+            radial-gradient(circle at 85% 20%, rgba(245, 200, 75, 0.08), transparent 28%),
+            linear-gradient(135deg, var(--cms-bg), var(--cms-bg-dark));
         color: var(--cms-text);
     }
 
     .analytics-wrapper {
-        background: var(--cms-bg);
         min-height: 100vh;
+        color: var(--cms-text);
+        animation: fadeIn 0.7s ease both;
     }
 
     .hero-card {
-        background: linear-gradient(135deg, var(--cms-primary), var(--cms-accent));
-        color: #fff;
-        border-radius: 20px;
-        padding: 28px;
-        box-shadow: 0 15px 35px rgba(30, 58, 138, 0.25);
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 15% 20%, rgba(29, 191, 115, 0.22), transparent 34%),
+            radial-gradient(circle at 88% 18%, rgba(245, 200, 75, 0.16), transparent 32%),
+            linear-gradient(135deg, #052017, #073824 55%, #03140f);
+        color: var(--cms-text);
+        border-radius: 28px;
+        padding: 30px;
+        border: 1px solid var(--cms-gold-border);
+        box-shadow: var(--cms-shadow);
+    }
+
+    .hero-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.20'/%3E%3C/svg%3E");
+        opacity: 0.10;
+        pointer-events: none;
+    }
+
+    .hero-card>* {
+        position: relative;
+        z-index: 2;
+    }
+
+    .hero-card h2 {
+        font-family: Georgia, 'Times New Roman', serif;
+        font-weight: 900;
+        letter-spacing: -0.03em;
     }
 
     .cms-card {
-        background: var(--cms-card);
+        background:
+            radial-gradient(circle at top right, rgba(245, 200, 75, 0.10), transparent 32%),
+            var(--cms-card);
+        color: var(--cms-text);
         border: 1px solid var(--cms-border);
-        border-radius: 18px;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+        border-radius: 26px;
+        box-shadow: var(--cms-shadow);
+        overflow: hidden;
     }
 
     .section-title {
-        font-weight: 700;
+        font-weight: 900;
         color: var(--cms-text);
         margin-bottom: 14px;
+        letter-spacing: -0.02em;
+    }
+
+    .text-muted {
+        color: var(--cms-muted) !important;
     }
 
     .profile-banner {
-        border-left: 6px solid var(--cms-primary);
+        border-left: 6px solid var(--cms-gold);
     }
 
     .avatar-circle {
-        width: 62px;
-        height: 62px;
-        border-radius: 50%;
-        background: var(--cms-primary-light);
-        color: var(--cms-primary);
+        width: 64px;
+        height: 64px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #ffe27a, #f0b92e);
+        color: #07331f;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 28px;
-        font-weight: 700;
+        font-size: 30px;
+        font-weight: 900;
+        box-shadow: var(--cms-gold-shadow);
     }
 
     .kpi-card {
-        border-radius: 18px;
-        padding: 20px;
+        border-radius: 24px;
+        padding: 22px;
         border: 1px solid var(--cms-border);
-        background: #fff;
         height: 100%;
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+        box-shadow: var(--cms-shadow);
+        transition: 0.3s ease;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--cms-gold-border);
     }
 
     .kpi-label {
         font-size: 13px;
-        color: var(--cms-muted);
-        font-weight: 600;
+        color: rgba(255, 248, 231, 0.76);
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
     }
 
     .kpi-value {
-        font-size: 28px;
-        font-weight: 800;
+        font-size: 30px;
+        font-weight: 900;
         margin-top: 8px;
     }
 
     .kpi-blue {
-        background: #dbeafe;
-        color: #1e3a8a;
+        background: rgba(56, 189, 248, 0.14);
+        color: #b7ecff;
+        border-color: rgba(56, 189, 248, 0.25);
     }
 
     .kpi-green {
-        background: #dcfce7;
-        color: #166534;
+        background: rgba(34, 197, 94, 0.14);
+        color: #9af0bf;
+        border-color: rgba(34, 197, 94, 0.25);
     }
 
     .kpi-indigo {
-        background: #e0e7ff;
-        color: #3730a3;
+        background: rgba(99, 102, 241, 0.16);
+        color: #c7d2fe;
+        border-color: rgba(99, 102, 241, 0.28);
     }
 
     .kpi-red {
-        background: #fee2e2;
-        color: #991b1b;
+        background: rgba(220, 53, 69, 0.14);
+        color: #ffb3bd;
+        border-color: rgba(220, 53, 69, 0.28);
     }
 
     .kpi-amber {
-        background: #fef3c7;
-        color: #92400e;
+        background: rgba(245, 158, 11, 0.15);
+        color: #ffe08a;
+        border-color: rgba(245, 158, 11, 0.28);
     }
 
     .insight-card {
-        background: #eff6ff;
-        border-left: 6px solid var(--cms-primary);
+        background:
+            radial-gradient(circle at top right, rgba(56, 189, 248, 0.10), transparent 34%),
+            rgba(5, 32, 23, 0.78);
+        border-left: 6px solid var(--cms-gold);
+    }
+
+    .note-card {
+        border-left: 6px solid var(--cms-green);
     }
 
     .soft-badge {
-        padding: 7px 11px;
+        padding: 7px 12px;
         border-radius: 30px;
         font-size: 12px;
-        font-weight: 600;
+        font-weight: 800;
         display: inline-block;
         margin: 3px;
+        border: 1px solid transparent;
     }
 
     .badge-soft-blue {
-        background: #dbeafe;
-        color: #1e3a8a;
+        background: rgba(56, 189, 248, 0.14);
+        color: #b7ecff;
+        border-color: rgba(56, 189, 248, 0.25);
     }
 
     .badge-soft-green {
-        background: #dcfce7;
-        color: #166534;
+        background: rgba(34, 197, 94, 0.14);
+        color: #9af0bf;
+        border-color: rgba(34, 197, 94, 0.25);
     }
 
     .badge-soft-amber {
-        background: #fef3c7;
-        color: #92400e;
+        background: rgba(245, 158, 11, 0.15);
+        color: #ffe08a;
+        border-color: rgba(245, 158, 11, 0.28);
     }
 
     .badge-soft-red {
-        background: #fee2e2;
-        color: #991b1b;
+        background: rgba(220, 53, 69, 0.14);
+        color: #ffb3bd;
+        border-color: rgba(220, 53, 69, 0.28);
+    }
+
+    .matrix-table {
+        color: var(--cms-text);
+        border-color: var(--cms-border);
     }
 
     .matrix-table th {
-        background: #f8fafc;
-        color: #334155;
+        background: rgba(245, 200, 75, 0.12);
+        color: var(--cms-gold);
         font-size: 13px;
         text-transform: uppercase;
+        border-color: var(--cms-border);
+        padding: 14px;
+        white-space: nowrap;
     }
 
     .matrix-table td {
+        background: rgba(255, 255, 255, 0.025);
+        color: var(--cms-text);
+        border-color: var(--cms-border);
         vertical-align: middle;
+        padding: 14px;
+    }
+
+    .matrix-table tbody tr:active td {
+        background: rgba(245, 200, 75, 0.12) !important;
+        border-color: var(--cms-gold-border);
     }
 
     .action-card {
-        background: linear-gradient(135deg, #ffffff, #f8fafc);
+        background:
+            radial-gradient(circle at top right, rgba(245, 200, 75, 0.13), transparent 34%),
+            var(--cms-card);
     }
 
-    .fade-in {
-        animation: fadeIn 0.6s ease-in;
+    .form-label {
+        color: var(--cms-text);
+        font-weight: 800;
+    }
+
+    .form-control,
+    .form-select {
+        background-color: rgba(255, 255, 255, 0.06);
+        color: var(--cms-text);
+        border: 1px solid var(--cms-border);
+        border-radius: 15px;
+        min-height: 46px;
+        font-weight: 600;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: var(--cms-text);
+        border-color: var(--cms-gold-border);
+        box-shadow: 0 0 0 4px rgba(245, 200, 75, 0.12);
+    }
+
+    .form-select option {
+        background: #052017;
+        color: var(--cms-text);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+    }
+
+    .btn {
+        border-radius: 999px;
+        font-weight: 800;
+    }
+
+    .btn-primary {
+        border: none;
+        background: linear-gradient(135deg, #ffe27a, #f0b92e);
+        color: #07331f;
+        box-shadow: var(--cms-gold-shadow);
+    }
+
+    .btn-primary:hover {
+        color: #07331f;
+        opacity: 0.96;
+        transform: translateY(-2px);
+    }
+
+    .btn-light {
+        border: none;
+        background: linear-gradient(135deg, #ffe27a, #f0b92e);
+        color: #07331f;
+        font-weight: 900;
+    }
+
+    .btn-light:hover {
+        color: #07331f;
+        opacity: 0.96;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-light,
+    .btn-outline-dark,
+    .btn-outline-warning,
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid var(--cms-border);
+        color: var(--cms-text);
+    }
+
+    .btn-outline-light:hover,
+    .btn-outline-dark:hover,
+    .btn-outline-warning:hover,
+    .btn-secondary:hover {
+        background: var(--cms-gold-soft);
+        color: var(--cms-gold);
+        border-color: var(--cms-gold-border);
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background: rgba(34, 197, 94, 0.18);
+        color: #9af0bf;
+        border: 1px solid rgba(34, 197, 94, 0.28);
+    }
+
+    .btn-success:hover {
+        background: #16a34a;
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .alert {
+        border-radius: 16px;
+        font-weight: 700;
+        border: 1px solid transparent;
+    }
+
+    .alert-success {
+        background: rgba(25, 135, 84, 0.13);
+        color: #9af0bf;
+        border-color: rgba(25, 135, 84, 0.28);
+    }
+
+    .alert-warning {
+        background: rgba(255, 193, 7, 0.13);
+        color: #ffe08a;
+        border-color: rgba(255, 193, 7, 0.28);
+    }
+
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.13);
+        color: #ffb3bd;
+        border-color: rgba(220, 53, 69, 0.30);
+    }
+
+    .alert-info,
+    .alert-secondary {
+        background: rgba(56, 189, 248, 0.12);
+        color: #b7ecff;
+        border-color: rgba(56, 189, 248, 0.25);
+    }
+
+    .border {
+        border-color: var(--cms-border) !important;
+    }
+
+    .rounded {
+        border-radius: 18px !important;
+    }
+
+    .bg-success {
+        background-color: #16a34a !important;
+    }
+
+    .bg-warning {
+        background-color: #f59e0b !important;
+        color: #111827 !important;
+    }
+
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
+
+    .bg-primary {
+        background-color: #2563eb !important;
+    }
+
+    .bg-secondary {
+        background-color: #64748b !important;
+    }
+
+    .bg-dark {
+        background-color: #111827 !important;
+    }
+
+    .pdf-hide {
+        display: inline-block;
     }
 
     @keyframes fadeIn {
@@ -178,26 +426,23 @@ $userRole = strtolower($_SESSION['role'] ?? '');
         }
     }
 
-    /* PDF FIX */
-    .pdf-hide {
-        display: inline-block;
-    }
-
     @media print {
 
         .pdf-hide,
         form,
         .btn,
-        .hero-card .d-flex.gap-2 {
+        .hero-card .d-flex.gap-2,
+        .sidebar,
+        .topbar {
             display: none !important;
         }
 
-        body {
+        body,
+        .analytics-wrapper,
+        .content-area,
+        .page-content {
             background: #ffffff !important;
-        }
-
-        .analytics-wrapper {
-            background: #ffffff !important;
+            color: #000000 !important;
         }
 
         .cms-card,
@@ -205,19 +450,87 @@ $userRole = strtolower($_SESSION['role'] ?? '');
         .kpi-card {
             box-shadow: none !important;
             border: 1px solid #ddd !important;
+            background: #ffffff !important;
+            color: #000000 !important;
         }
 
         .hero-card {
-            color: #000 !important;
+            color: #000000 !important;
             background: #ffffff !important;
         }
+
+        .text-muted {
+            color: #555 !important;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .hero-card {
+            padding: 22px;
+        }
+
+        .kpi-value {
+            font-size: 26px;
+        }
+    }
+
+    /* Remove all click / focus white flash */
+    .matrix-table tbody tr,
+    .matrix-table tbody td {
+        outline: none !important;
+    }
+
+    .matrix-table tbody tr:hover {
+        background: rgba(137, 180, 55, 0.7) !important;
+        color: var(--cms-text) !important;
+    }
+
+    /* Row + cell active/focus states */
+    .matrix-table tbody tr:focus,
+    .matrix-table tbody tr:active,
+    .matrix-table tbody tr td:focus,
+    .matrix-table tbody tr td:active {
+        background: rgba(245, 200, 75, 0.12) !important;
+        color: var(--cms-text) !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Bootstrap override */
+    .table> :not(caption)>*>*:active,
+    .table> :not(caption)>*>*:focus {
+        background-color: rgba(245, 200, 75, 0.12) !important;
+        color: var(--cms-text) !important;
+    }
+
+    /* If links/buttons inside table */
+    .matrix-table a,
+    .matrix-table button {
+        outline: none !important;
+    }
+
+    .matrix-table a:focus,
+    .matrix-table a:active,
+    .matrix-table button:focus,
+    .matrix-table button:active {
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    /* 🔥 MOST IMPORTANT for mobile / Chrome */
+    * {
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
+    .matrix-table *:focus {
+        outline: none !important;
+        box-shadow: none !important;
     }
 </style>
 
 <div class="analytics-wrapper py-4 fade-in" id="reportContent">
     <div class="container-fluid px-4">
 
-        <!-- PAGE HEADER -->
         <div class="hero-card mb-4">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
@@ -241,7 +554,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
             </div>
         </div>
 
-        <!-- FILTERS -->
         <div class="cms-card p-4 mb-4">
             <h5 class="section-title">Filters</h5>
 
@@ -252,7 +564,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
                     <?php if ($userRole === 'admin'): ?>
 
-                        <!-- Academic Year -->
                         <div class="col-md-3">
                             <label class="form-label small text-muted">Academic Year</label>
                             <select name="academic_year" class="form-select" onchange="this.form.submit()">
@@ -266,7 +577,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Course -->
                         <div class="col-md-3">
                             <label class="form-label small text-muted">Course</label>
                             <select name="course_id" class="form-select" onchange="this.form.submit()">
@@ -280,7 +590,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Semester -->
                         <div class="col-md-3">
                             <label class="form-label small text-muted">Semester</label>
                             <select name="semester_id" class="form-select" onchange="this.form.submit()">
@@ -294,7 +603,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Button -->
                         <div class="col-md-3">
                             <button class="btn btn-primary w-100">
                                 View Summary
@@ -303,7 +611,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
                     <?php elseif ($userRole === 'faculty'): ?>
 
-                        <!-- Academic Year -->
                         <div class="col-md-2">
                             <label class="form-label small text-muted">Academic Year</label>
                             <select name="academic_year" class="form-select" onchange="this.form.submit()">
@@ -317,7 +624,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Course -->
                         <div class="col-md-2">
                             <label class="form-label small text-muted">Course</label>
                             <select name="course_id" class="form-select" onchange="this.form.submit()">
@@ -331,7 +637,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Semester -->
                         <div class="col-md-2">
                             <label class="form-label small text-muted">Semester</label>
                             <select name="semester_id" class="form-select" onchange="this.form.submit()">
@@ -345,7 +650,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Section -->
                         <div class="col-md-1">
                             <label class="form-label small text-muted">Section</label>
                             <select name="section_id" class="form-select" onchange="this.form.submit()">
@@ -359,7 +663,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Student -->
                         <div class="col-md-2">
                             <label class="form-label small text-muted">Student</label>
                             <select name="student_id" class="form-select">
@@ -373,7 +676,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Subject -->
                         <div class="col-md-2">
                             <label class="form-label small text-muted">Subject</label>
                             <select name="subject_id" class="form-select">
@@ -389,7 +691,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Button -->
                         <div class="col-md-1">
                             <button class="btn btn-primary w-100">
                                 View
@@ -398,7 +699,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
                     <?php elseif ($userRole === 'student'): ?>
 
-                        <!-- Subject only -->
                         <div class="col-md-4">
                             <label class="form-label small text-muted">Subject</label>
                             <select name="subject_id" class="form-select">
@@ -414,7 +714,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             </select>
                         </div>
 
-                        <!-- Button -->
                         <div class="col-md-2">
                             <button class="btn btn-primary w-100">
                                 View
@@ -437,7 +736,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
             $averageAttendance = $adminSemesterSummary['average_attendance'] ?? 0;
             ?>
 
-            <!-- ADMIN SUMMARY KPI -->
             <div class="row g-3 mb-4">
                 <div class="col-md">
                     <div class="kpi-card kpi-blue">
@@ -475,16 +773,15 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 </div>
             </div>
 
-            <!-- SEMESTER COMPARISON -->
             <div class="cms-card p-4 mb-4">
                 <h5 class="section-title">
-    Semester-wise Performance Comparison
-    <?php if (!empty($selectedSemesterId)): ?>
-        <small class="text-muted">- Selected Semester</small>
-    <?php else: ?>
-        <small class="text-muted">- All Semesters</small>
-    <?php endif; ?>
-</h5>
+                    Semester-wise Performance Comparison
+                    <?php if (!empty($selectedSemesterId)): ?>
+                        <small class="text-muted">- Selected Semester</small>
+                    <?php else: ?>
+                        <small class="text-muted">- All Semesters</small>
+                    <?php endif; ?>
+                </h5>
 
                 <?php if (!empty($adminSemesterComparison)): ?>
                     <div class="table-responsive">
@@ -547,7 +844,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 <?php endif; ?>
             </div>
 
-            <!-- ADMIN INSIGHT -->
             <div class="cms-card insight-card p-4 mb-4">
                 <h5 class="section-title">Admin Insight</h5>
 
@@ -650,7 +946,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
             }
             ?>
 
-            <!-- STUDENT PROFILE BANNER -->
             <div class="cms-card profile-banner p-4 mb-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div class="d-flex align-items-center gap-3">
@@ -692,7 +987,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 </div>
             </div>
 
-            <!-- KPI CARDS -->
             <div class="row g-3 mb-4">
                 <div class="col-md">
                     <div class="kpi-card kpi-blue">
@@ -708,15 +1002,17 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                     </div>
                 </div>
 
-                <div class="kpi-card kpi-indigo">
-                    <div class="kpi-label">Class Rank</div>
-                    <div class="kpi-value">
-                        <?php if (!empty($classRank)): ?>
-                            <?= htmlspecialchars($classRank['student_rank']) ?> /
-                            <?= htmlspecialchars($classRank['total_students']) ?>
-                        <?php elseif ($userRole !== 'admin'): ?>
-                            N/A
-                        <?php endif; ?>
+                <div class="col-md">
+                    <div class="kpi-card kpi-indigo">
+                        <div class="kpi-label">Class Rank</div>
+                        <div class="kpi-value">
+                            <?php if (!empty($classRank)): ?>
+                                <?= htmlspecialchars($classRank['student_rank']) ?> /
+                                <?= htmlspecialchars($classRank['total_students']) ?>
+                            <?php elseif ($userRole !== 'admin'): ?>
+                                N/A
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </div>
 
@@ -737,64 +1033,62 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 </div>
             </div>
 
-            <!-- TEACHER NOTE -->
-<div class="cms-card note-card p-4 mb-4">
-    <h5 class="section-title">Teacher's Note</h5>
+            <div class="cms-card note-card p-4 mb-4">
+                <h5 class="section-title">Teacher's Note</h5>
 
-    <?php if (isset($_GET['note_saved'])): ?>
-        <div class="alert alert-success">
-            Teacher note saved successfully.
-        </div>
-    <?php endif; ?>
+                <?php if (isset($_GET['note_saved'])): ?>
+                    <div class="alert alert-success">
+                        Teacher note saved successfully.
+                    </div>
+                <?php endif; ?>
 
-    <?php if ($userRole === 'faculty'): ?>
+                <?php if ($userRole === 'faculty'): ?>
 
-        <form method="POST" action="<?= BASE_URL ?>save-teacher-note">
-            <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentId) ?>">
-            <input type="hidden" name="redirect_url" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+                    <form method="POST" action="<?= BASE_URL ?>save-teacher-note">
+                        <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentId) ?>">
+                        <input type="hidden" name="redirect_url" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
 
-            <div class="mb-3">
-                <label class="form-label small text-muted">
-                    Add / Update Note for <?= htmlspecialchars($studentName ?? 'Student') ?>
-                </label>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted">
+                                Add / Update Note for <?= htmlspecialchars($studentName ?? 'Student') ?>
+                            </label>
 
-                <textarea
-                    name="teacher_note"
-                    class="form-control"
-                    rows="4"
-                    placeholder="Example: Student is attentive in class but should improve assignment submission and revision before next IA."
-                    required><?= htmlspecialchars($teacherNote['note'] ?? '') ?></textarea>
+                            <textarea
+                                name="teacher_note"
+                                class="form-control"
+                                rows="4"
+                                placeholder="Example: Student is attentive in class but should improve assignment submission and revision before next IA."
+                                required><?= htmlspecialchars($teacherNote['note'] ?? '') ?></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            💾 Save Teacher Note
+                        </button>
+                    </form>
+
+                <?php elseif ($userRole === 'student'): ?>
+
+                    <?php if (!empty($teacherNote)): ?>
+                        <div class="alert alert-info mb-2">
+                            <?= nl2br(htmlspecialchars($teacherNote['note'])) ?>
+                        </div>
+
+                        <small class="text-muted">
+                            Added by:
+                            <?= htmlspecialchars(trim(($teacherNote['faculty_first_name'] ?? '') . ' ' . ($teacherNote['faculty_last_name'] ?? ''))) ?>
+                            |
+                            Last Updated:
+                            <?= htmlspecialchars(date('d M Y', strtotime($teacherNote['updated_at']))) ?>
+                        </small>
+                    <?php else: ?>
+                        <div class="alert alert-secondary mb-0">
+                            No teacher note added yet.
+                        </div>
+                    <?php endif; ?>
+
+                <?php endif; ?>
             </div>
 
-            <button type="submit" class="btn btn-primary">
-                💾 Save Teacher Note
-            </button>
-        </form>
-
-    <?php elseif ($userRole === 'student'): ?>
-
-        <?php if (!empty($teacherNote)): ?>
-            <div class="alert alert-info mb-2">
-                <?= nl2br(htmlspecialchars($teacherNote['note'])) ?>
-            </div>
-
-            <small class="text-muted">
-                Added by:
-                <?= htmlspecialchars(trim(($teacherNote['faculty_first_name'] ?? '') . ' ' . ($teacherNote['faculty_last_name'] ?? ''))) ?>
-                |
-                Last Updated:
-                <?= htmlspecialchars(date('d M Y', strtotime($teacherNote['updated_at']))) ?>
-            </small>
-        <?php else: ?>
-            <div class="alert alert-secondary mb-0">
-                No teacher note added yet.
-            </div>
-        <?php endif; ?>
-
-    <?php endif; ?>
-</div>
-
-            <!-- ACADEMIC INSIGHT -->
             <div class="cms-card insight-card p-4 mb-4">
                 <h5 class="section-title">Academic Insight</h5>
 
@@ -819,74 +1113,69 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
             <?php if ($userRole === 'faculty' && $overview): ?>
 
-    <!-- FACULTY ATTENDANCE UPDATE -->
-    <div class="cms-card p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div>
-                <h5 class="section-title mb-1">Update Student Attendance</h5>
-                <p class="text-muted mb-0">
-                    Faculty can update present and absent days for the selected student.
-                </p>
-            </div>
-        </div>
+                <div class="cms-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <div>
+                            <h5 class="section-title mb-1">Update Student Attendance</h5>
+                            <p class="text-muted mb-0">
+                                Faculty can update present and absent days for the selected student.
+                            </p>
+                        </div>
+                    </div>
 
-        <?php if (isset($_GET['attendance_saved'])): ?>
-            <div class="alert alert-success">
-                Attendance updated successfully.
-            </div>
-        <?php endif; ?>
+                    <?php if (isset($_GET['attendance_saved'])): ?>
+                        <div class="alert alert-success">
+                            Attendance updated successfully.
+                        </div>
+                    <?php endif; ?>
 
-        <form method="POST" action="<?= BASE_URL ?>save-student-attendance">
-            <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentId) ?>">
-            <input type="hidden" name="redirect_url" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+                    <form method="POST" action="<?= BASE_URL ?>save-student-attendance">
+                        <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentId) ?>">
+                        <input type="hidden" name="redirect_url" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
 
-            <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label small text-muted">Present Days</label>
-                    <input 
-                        type="number"
-                        name="present_days"
-                        class="form-control"
-                        min="0"
-                        value="<?= htmlspecialchars($presentDays ?? 0) ?>"
-                        required
-                    >
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Present Days</label>
+                                <input
+                                    type="number"
+                                    name="present_days"
+                                    class="form-control"
+                                    min="0"
+                                    value="<?= htmlspecialchars($presentDays ?? 0) ?>"
+                                    required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Absent Days</label>
+                                <input
+                                    type="number"
+                                    name="absent_days"
+                                    class="form-control"
+                                    min="0"
+                                    value="<?= htmlspecialchars($absentDays ?? 0) ?>"
+                                    required>
+                            </div>
+
+                            <div class="col-md-3">
+                                <label class="form-label small text-muted">Total Days</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars(($presentDays ?? 0) + ($absentDays ?? 0)) ?>"
+                                    readonly>
+                            </div>
+
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    💾 Save Attendance
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label small text-muted">Absent Days</label>
-                    <input 
-                        type="number"
-                        name="absent_days"
-                        class="form-control"
-                        min="0"
-                        value="<?= htmlspecialchars($absentDays ?? 0) ?>"
-                        required
-                    >
-                </div>
+            <?php endif; ?>
 
-                <div class="col-md-3">
-                    <label class="form-label small text-muted">Total Days</label>
-                    <input 
-                        type="text"
-                        class="form-control"
-                        value="<?= htmlspecialchars(($presentDays ?? 0) + ($absentDays ?? 0)) ?>"
-                        readonly
-                    >
-                </div>
-
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100">
-                        💾 Save Attendance
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
-
-<?php endif; ?>
-
-            <!-- CHART + ATTENDANCE SUMMARY -->
             <div class="row g-4 mb-4">
                 <div class="col-lg-8">
                     <div class="cms-card p-4 h-100">
@@ -967,88 +1256,85 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
             <?php if ($userRole === 'faculty' && !empty($subjectPerformance)): ?>
 
-    <!-- FACULTY MARKS UPDATE -->
-    <div class="cms-card p-4 mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div>
-                <h5 class="section-title mb-1">Update Student Marks</h5>
-                <p class="text-muted mb-0">
-                    Faculty can update First IA, Second IA and Mid Term marks for the selected student.
-                </p>
-            </div>
-        </div>
+                <div class="cms-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                        <div>
+                            <h5 class="section-title mb-1">Update Student Marks</h5>
+                            <p class="text-muted mb-0">
+                                Faculty can update First IA, Second IA and Mid Term marks for the selected student.
+                            </p>
+                        </div>
+                    </div>
 
-        <?php if (isset($_GET['marks_saved'])): ?>
-            <div class="alert alert-success">
-                Marks updated successfully.
-            </div>
-        <?php endif; ?>
+                    <?php if (isset($_GET['marks_saved'])): ?>
+                        <div class="alert alert-success">
+                            Marks updated successfully.
+                        </div>
+                    <?php endif; ?>
 
-        <form method="POST" action="<?= BASE_URL ?>save-student-marks">
-            <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentId) ?>">
-            <input type="hidden" name="redirect_url" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+                    <form method="POST" action="<?= BASE_URL ?>save-student-marks">
+                        <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentId) ?>">
+                        <input type="hidden" name="redirect_url" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
 
-            <div class="table-responsive">
-                <table class="table table-hover matrix-table align-middle">
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>First IA / 25</th>
-                            <th>Second IA / 25</th>
-                            <th>Mid Term / 50</th>
-                        </tr>
-                    </thead>
+                        <div class="table-responsive">
+                            <table class="table table-hover matrix-table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>First IA / 25</th>
+                                        <th>Second IA / 25</th>
+                                        <th>Mid Term / 50</th>
+                                    </tr>
+                                </thead>
 
-                    <tbody>
-                        <?php foreach ($subjectPerformance as $row): ?>
-                            <tr>
-                                <td class="fw-semibold">
-                                    <?= htmlspecialchars($row['subject_name']) ?>
-                                </td>
+                                <tbody>
+                                    <?php foreach ($subjectPerformance as $row): ?>
+                                        <tr>
+                                            <td class="fw-semibold">
+                                                <?= htmlspecialchars($row['subject_name']) ?>
+                                            </td>
 
-                                <?php foreach ($examList as $exam): ?>
-                                    <?php
-                                    $examName = $exam['exam_name'];
-                                    $value = 0;
+                                            <?php foreach ($examList as $exam): ?>
+                                                <?php
+                                                $examName = $exam['exam_name'];
+                                                $value = 0;
 
-                                    if ($examName === 'First IA') {
-                                        $value = $row['first_ia'] ?? 0;
-                                    } elseif ($examName === 'Second IA') {
-                                        $value = $row['second_ia'] ?? 0;
-                                    } elseif ($examName === 'Mid Term') {
-                                        $value = $row['mid_term'] ?? 0;
-                                    }
+                                                if ($examName === 'First IA') {
+                                                    $value = $row['first_ia'] ?? 0;
+                                                } elseif ($examName === 'Second IA') {
+                                                    $value = $row['second_ia'] ?? 0;
+                                                } elseif ($examName === 'Mid Term') {
+                                                    $value = $row['mid_term'] ?? 0;
+                                                }
 
-                                    $maxMarks = $exam['total_marks'] ?? 100;
-                                    ?>
+                                                $maxMarks = $exam['total_marks'] ?? 100;
+                                                ?>
 
-                                    <td>
-                                        <input 
-                                            type="number"
-                                            name="marks[<?= htmlspecialchars($row['subject_id']) ?>][<?= htmlspecialchars($exam['id']) ?>]"
-                                            value="<?= htmlspecialchars($value) ?>"
-                                            min="0"
-                                            max="<?= htmlspecialchars($maxMarks) ?>"
-                                            step="0.01"
-                                            class="form-control form-control-sm"
-                                        >
-                                    </td>
-                                <?php endforeach; ?>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
+                                                <td>
+                                                    <input
+                                                        type="number"
+                                                        name="marks[<?= htmlspecialchars($row['subject_id']) ?>][<?= htmlspecialchars($exam['id']) ?>]"
+                                                        value="<?= htmlspecialchars($value) ?>"
+                                                        min="0"
+                                                        max="<?= htmlspecialchars($maxMarks) ?>"
+                                                        step="0.01"
+                                                        class="form-control form-control-sm">
+                                                </td>
+                                            <?php endforeach; ?>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
 
-            <button type="submit" class="btn btn-primary">
-                💾 Save Marks
-            </button>
-        </form>
-    </div>
+                        <button type="submit" class="btn btn-primary">
+                            💾 Save Marks
+                        </button>
+                    </form>
+                </div>
 
-<?php endif; ?>
+            <?php endif; ?>
 
-            <!-- SUBJECT PERFORMANCE MATRIX -->
             <div class="cms-card p-4 mb-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                     <h5 class="section-title mb-0">Subject Performance Matrix</h5>
@@ -1156,7 +1442,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 </div>
             </div>
 
-            <!-- STUDENT VS CLASS AVERAGE -->
             <div class="cms-card p-4 mb-4">
                 <h5 class="section-title">Student vs Class Average</h5>
 
@@ -1231,7 +1516,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 <?php endif; ?>
             </div>
 
-            <!-- IMPROVEMENT PLAN -->
             <div class="cms-card p-4 mb-4">
                 <h5 class="section-title">Improvement Plan</h5>
 
@@ -1286,46 +1570,43 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 <?php endif; ?>
             </div>
 
-
             <?php if ($userRole !== 'student'): ?>
-            <!-- PARENT ALERT & EXPORT -->
-            <div class="cms-card action-card p-4 mb-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div>
-                        <h5 class="section-title mb-1">Parent Alert & Export</h5>
-                        <p class="text-muted mb-0">
-                            Send performance alert to parent or export the report.
-                        </p>
-                    </div>
+                <div class="cms-card action-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h5 class="section-title mb-1">Parent Alert & Export</h5>
+                            <p class="text-muted mb-0">
+                                Send performance alert to parent or export the report.
+                            </p>
+                        </div>
 
-                    <div class="d-flex gap-2 flex-wrap pdf-hide">
-                        <?php if (!empty($whatsappUrl)): ?>
-                            <a href="<?= htmlspecialchars($whatsappUrl) ?>" target="_blank" class="btn btn-success">
-                                📲 Send WhatsApp Alert
-                            </a>
-                        <?php else: ?>
-                            <button class="btn btn-outline-warning" disabled>
-                                Parent Phone Not Added
+                        <div class="d-flex gap-2 flex-wrap pdf-hide">
+                            <?php if (!empty($whatsappUrl)): ?>
+                                <a href="<?= htmlspecialchars($whatsappUrl) ?>" target="_blank" class="btn btn-success">
+                                    📲 Send WhatsApp Alert
+                                </a>
+                            <?php else: ?>
+                                <button class="btn btn-outline-warning" disabled>
+                                    Parent Phone Not Added
+                                </button>
+                            <?php endif; ?>
+
+                            <button type="button" onclick="downloadPDF()" class="btn btn-primary">
+                                📄 Download Report
                             </button>
-                        <?php endif; ?>
 
-                        <button type="button" onclick="downloadPDF()" class="btn btn-primary">
-                            📄 Download Report
-                        </button>
+                            <button type="button" onclick="window.print()" class="btn btn-outline-dark">
+                                🖨 Print
+                            </button>
 
-                        <button type="button" onclick="window.print()" class="btn btn-outline-dark">
-                            🖨 Print
-                        </button>
-
-                        <a href="<?= BASE_URL ?>student-performance" class="btn btn-secondary">
-                            ← Back
-                        </a>
+                            <a href="<?= BASE_URL ?>student-performance" class="btn btn-secondary">
+                                ← Back
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
             <?php endif; ?>
 
-            <!-- CHART SCRIPT -->
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
                 const chartElement = document.getElementById('trendChart');
@@ -1333,24 +1614,66 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 if (chartElement) {
                     const labels = <?= json_encode(array_column($trend, 'exam_name')) ?>;
                     const data = <?= json_encode(array_column($trend, 'avg_marks')) ?>;
+                    const attendance = <?= json_encode($attendancePercentage ?? 0) ?>;
+
+                    function getReason(index) {
+                        const current = data[index];
+                        const previous = index > 0 ? data[index - 1] : null;
+
+                        if (previous === null) return "Starting performance baseline.";
+
+                        if (current < previous) {
+                            if (attendance < 60) return "Low attendance → performance drop.";
+                            if (attendance < 75) return "Needs more revision & practice.";
+                            return "Drop despite good attendance → check assignments.";
+                        }
+
+                        if (current > previous) {
+                            if (attendance >= 75) return "Strong improvement due to consistency.";
+                            return "Improvement seen but attendance can improve.";
+                        }
+
+                        return "Stable performance.";
+                    }
+
+                    function getColor(index) {
+                        const current = data[index];
+                        const previous = index > 0 ? data[index - 1] : null;
+
+                        if (previous === null) return '#3b82f6'; // blue
+
+                        if (current > previous) return '#16a34a'; // green
+                        if (current < previous) return '#dc2626'; // red
+
+                        return '#f59e0b'; // amber
+                    }
+
+                    const backgroundColors = data.map((_, i) => getColor(i));
 
                     new Chart(chartElement, {
-                        type: 'line',
+                        type: 'bar',
                         data: {
                             labels: labels,
                             datasets: [{
                                 label: 'Marks',
                                 data: data,
-                                borderWidth: 3,
-                                tension: 0.35,
-                                fill: false
+                                backgroundColor: backgroundColors,
+                                borderRadius: 8
                             }]
                         },
                         options: {
                             responsive: true,
                             plugins: {
-                                legend: {
-                                    display: true
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const index = context.dataIndex;
+                                            return [
+                                                "Marks: " + context.raw,
+                                                "Insight: " + getReason(index)
+                                            ];
+                                        }
+                                    }
                                 }
                             },
                             scales: {
@@ -1360,12 +1683,27 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             }
                         }
                     });
+
+                    // 🔥 INSIGHT BOX UPDATE
+                    const insightBox = document.getElementById('trendInsight');
+
+                    if (insightBox) {
+                        let lastIndex = data.length - 1;
+                        insightBox.innerText = getReason(lastIndex);
+                    }
                 }
             </script>
 
+            <div class="cms-card p-3 mt-3" id="trendInsightBox">
+                <strong>📊 Latest Insight:</strong>
+                <p id="trendInsight" class="mb-0 text-muted">
+                    Loading insight...
+                </p>
+            </div>
+
         <?php elseif ($userRole !== 'admin'): ?>
 
-            <div class="cms-card p-5 text-center"
+            <div class="cms-card p-5 text-center">
                 <h5 class="fw-bold">Select a student to view performance analytics</h5>
                 <p class="text-muted mb-0">
                     Choose a student from the filter section and click View.
@@ -1376,8 +1714,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
     </div>
 </div>
-
-
 
 <script>
     function downloadPDF() {
@@ -1442,7 +1778,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 <td colspan="8" style="text-align:center;">No subject performance data found</td>
             </tr>
         <?php endif; ?>
-    `;
+        `;
 
         const improvementRows = `
         <?php if (!empty($weakSubjects)): ?>
@@ -1473,7 +1809,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 <td colspan="5" style="text-align:center;">No weak subjects found. Student performance is satisfactory.</td>
             </tr>
         <?php endif; ?>
-    `;
+        `;
 
         let attendanceStatus = "Low Attendance";
 
@@ -1658,31 +1994,6 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                     margin-top: 30px;
                     text-align: right;
                     font-weight: 700;
-                }
-
-                .badge {
-                    display: inline-block;
-                    padding: 3px 7px;
-                    border-radius: 20px;
-                    font-size: 11px;
-                    font-weight: 700;
-                    background: #e5e7eb;
-                    color: #111827;
-                }
-
-                .badge-green {
-                    background: #dcfce7;
-                    color: #166534;
-                }
-
-                .badge-amber {
-                    background: #fef3c7;
-                    color: #92400e;
-                }
-
-                .badge-red {
-                    background: #fee2e2;
-                    color: #991b1b;
                 }
 
                 @page {
@@ -1882,9 +2193,10 @@ $userRole = strtolower($_SESSION['role'] ?? '');
             <\/script>
         </body>
         </html>
-    `);
+        `);
 
         printWindow.document.close();
     }
 </script>
+
 <?php include __DIR__ . '/../layouts/footer.php'; ?>

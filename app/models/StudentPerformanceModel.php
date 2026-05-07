@@ -183,30 +183,38 @@ class StudentPerformanceModel
     public function getClassRank($studentId)
     {
         $sql = "
+    SELECT 
+        ranked.student_id,
+        ranked.avg_percentage,
+        ranked.student_rank,
+        ranked.total_students
+    FROM (
         SELECT 
-            ranked.student_id,
-            ranked.avg_percentage,
-            ranked.student_rank,
-            ranked.total_students
-        FROM (
-            SELECT 
-                s.id AS student_id,
-                ROUND((SUM(m.marks_obtained) / SUM(e.total_marks)) * 100, 2) AS avg_percentage,
-                RANK() OVER (
-                    ORDER BY ROUND((SUM(m.marks_obtained) / SUM(e.total_marks)) * 100, 2) DESC
-                ) AS student_rank,
-                COUNT(*) OVER () AS total_students
-            FROM students s
-            INNER JOIN marks m ON s.id = m.student_id
-            INNER JOIN exams e ON m.exam_id = e.id
-            WHERE (
-                e.exam_name LIKE '%IA%'
-                OR e.exam_name LIKE '%Internal%'
-                OR e.exam_name LIKE '%Mid%'
-            )
-            GROUP BY s.id
-        ) ranked
-        WHERE ranked.student_id = ?
+            s.id AS student_id,
+            s.semester_id,
+
+            ROUND((SUM(m.marks_obtained) / SUM(e.total_marks)) * 100, 2) AS avg_percentage,
+
+            RANK() OVER (
+                PARTITION BY s.semester_id, s.course_id
+                ORDER BY ROUND((SUM(m.marks_obtained) / SUM(e.total_marks)) * 100, 2) DESC
+            ) AS student_rank,
+
+            COUNT(*) OVER (PARTITION BY s.semester_id, s.course_id) AS total_students
+
+        FROM students s
+        INNER JOIN marks m ON s.id = m.student_id
+        INNER JOIN exams e ON m.exam_id = e.id
+
+        WHERE (
+            e.exam_name LIKE '%IA%'
+            OR e.exam_name LIKE '%Internal%'
+            OR e.exam_name LIKE '%Mid%'
+        )
+
+        GROUP BY s.id, s.semester_id, s.course_id
+    ) ranked
+    WHERE ranked.student_id = ?
     ";
 
         $stmt = $this->conn->prepare($sql);
