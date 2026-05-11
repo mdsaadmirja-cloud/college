@@ -8,30 +8,27 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
 <style>
     :root {
-        --cms-bg: #052017;
-        --cms-bg-dark: #03140f;
-        --cms-card: rgba(5, 32, 23, 0.78);
-        --cms-card-soft: rgba(255, 255, 255, 0.055);
-        --cms-border: rgba(255, 255, 255, 0.11);
-        --cms-gold: #f5c84b;
-        --cms-gold-soft: rgba(245, 200, 75, 0.16);
-        --cms-gold-border: rgba(245, 200, 75, 0.28);
-        --cms-text: #fff8e7;
-        --cms-muted: rgba(255, 248, 231, 0.68);
-        --cms-green: #1dbf73;
-        --cms-success: #22c55e;
+        --cms-bg: #f8f7f4;
+        --cms-bg-dark: #edeae4;
+        --cms-card: #ffffff;
+        --cms-card-soft: rgba(245, 158, 11, 0.06);
+        --cms-border: rgba(30, 37, 53, 0.13);
+        --cms-gold: #f59e0b;
+        --cms-gold-soft: rgba(245, 158, 11, 0.12);
+        --cms-gold-border: rgba(245, 158, 11, 0.35);
+        --cms-text: #1e2535;
+        --cms-muted: rgba(30, 37, 53, 0.55);
+        --cms-green: #d97706;
+        --cms-success: #16a34a;
         --cms-warning: #f59e0b;
         --cms-danger: #dc3545;
-        --cms-info: #38bdf8;
-        --cms-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
-        --cms-gold-shadow: 0 18px 45px rgba(245, 200, 75, 0.18);
+        --cms-info: #0ea5e9;
+        --cms-shadow: 0 4px 24px rgba(30, 37, 53, 0.10);
+        --cms-gold-shadow: 0 8px 24px rgba(245, 158, 11, 0.18);
     }
 
     body {
-        background:
-            radial-gradient(circle at 15% 15%, rgba(29, 191, 115, 0.10), transparent 30%),
-            radial-gradient(circle at 85% 20%, rgba(245, 200, 75, 0.08), transparent 28%),
-            linear-gradient(135deg, var(--cms-bg), var(--cms-bg-dark));
+        background: var(--cms-bg);
         color: var(--cms-text);
     }
 
@@ -44,15 +41,12 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     .hero-card {
         position: relative;
         overflow: hidden;
-        background:
-            radial-gradient(circle at 15% 20%, rgba(29, 191, 115, 0.22), transparent 34%),
-            radial-gradient(circle at 88% 18%, rgba(245, 200, 75, 0.16), transparent 32%),
-            linear-gradient(135deg, #052017, #073824 55%, #03140f);
-        color: var(--cms-text);
+        background: linear-gradient(135deg, #f59e0b 0%, #f97316 55%, #dc2626 100%);
+        color: #ffffff;
         border-radius: 28px;
         padding: 30px;
-        border: 1px solid var(--cms-gold-border);
-        box-shadow: var(--cms-shadow);
+        border: none;
+        box-shadow: var(--cms-gold-shadow);
     }
 
     .hero-card::before {
@@ -60,7 +54,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
         position: absolute;
         inset: 0;
         background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.20'/%3E%3C/svg%3E");
-        opacity: 0.10;
+        opacity: 0.08;
         pointer-events: none;
     }
 
@@ -76,9 +70,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .cms-card {
-        background:
-            radial-gradient(circle at top right, rgba(245, 200, 75, 0.10), transparent 32%),
-            var(--cms-card);
+        background: var(--cms-card);
         color: var(--cms-text);
         border: 1px solid var(--cms-border);
         border-radius: 26px;
@@ -105,8 +97,8 @@ $userRole = strtolower($_SESSION['role'] ?? '');
         width: 64px;
         height: 64px;
         border-radius: 22px;
-        background: linear-gradient(135deg, #ffe27a, #f0b92e);
-        color: #07331f;
+        background: linear-gradient(135deg, #fff8ee, #fde68a);
+        color: #92400e;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -131,7 +123,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
     .kpi-label {
         font-size: 13px;
-        color: rgba(255, 248, 231, 0.76);
+        color: var(--cms-muted);
         font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.8px;
@@ -144,44 +136,42 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .kpi-blue {
-        background: rgba(56, 189, 248, 0.14);
-        color: #b7ecff;
-        border-color: rgba(56, 189, 248, 0.25);
+        background: rgba(14, 165, 233, 0.08);
+        color: #0369a1;
+        border-color: rgba(14, 165, 233, 0.22);
     }
 
     .kpi-green {
-        background: rgba(34, 197, 94, 0.14);
-        color: #9af0bf;
-        border-color: rgba(34, 197, 94, 0.25);
+        background: rgba(22, 163, 74, 0.08);
+        color: #15803d;
+        border-color: rgba(22, 163, 74, 0.22);
     }
 
     .kpi-indigo {
-        background: rgba(99, 102, 241, 0.16);
-        color: #c7d2fe;
-        border-color: rgba(99, 102, 241, 0.28);
+        background: rgba(99, 102, 241, 0.08);
+        color: #4338ca;
+        border-color: rgba(99, 102, 241, 0.22);
     }
 
     .kpi-red {
-        background: rgba(220, 53, 69, 0.14);
-        color: #ffb3bd;
-        border-color: rgba(220, 53, 69, 0.28);
+        background: rgba(220, 53, 69, 0.08);
+        color: #b91c1c;
+        border-color: rgba(220, 53, 69, 0.22);
     }
 
     .kpi-amber {
-        background: rgba(245, 158, 11, 0.15);
-        color: #ffe08a;
+        background: rgba(245, 158, 11, 0.10);
+        color: #92400e;
         border-color: rgba(245, 158, 11, 0.28);
     }
 
     .insight-card {
-        background:
-            radial-gradient(circle at top right, rgba(56, 189, 248, 0.10), transparent 34%),
-            rgba(5, 32, 23, 0.78);
+        background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(249,115,22,0.04));
         border-left: 6px solid var(--cms-gold);
     }
 
     .note-card {
-        border-left: 6px solid var(--cms-green);
+        border-left: 6px solid #d97706;
     }
 
     .soft-badge {
@@ -195,27 +185,27 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .badge-soft-blue {
-        background: rgba(56, 189, 248, 0.14);
-        color: #b7ecff;
-        border-color: rgba(56, 189, 248, 0.25);
+        background: rgba(14, 165, 233, 0.10);
+        color: #0369a1;
+        border-color: rgba(14, 165, 233, 0.22);
     }
 
     .badge-soft-green {
-        background: rgba(34, 197, 94, 0.14);
-        color: #9af0bf;
-        border-color: rgba(34, 197, 94, 0.25);
+        background: rgba(22, 163, 74, 0.10);
+        color: #15803d;
+        border-color: rgba(22, 163, 74, 0.22);
     }
 
     .badge-soft-amber {
-        background: rgba(245, 158, 11, 0.15);
-        color: #ffe08a;
+        background: rgba(245, 158, 11, 0.12);
+        color: #92400e;
         border-color: rgba(245, 158, 11, 0.28);
     }
 
     .badge-soft-red {
-        background: rgba(220, 53, 69, 0.14);
-        color: #ffb3bd;
-        border-color: rgba(220, 53, 69, 0.28);
+        background: rgba(220, 53, 69, 0.10);
+        color: #b91c1c;
+        border-color: rgba(220, 53, 69, 0.22);
     }
 
     .matrix-table {
@@ -224,8 +214,8 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .matrix-table th {
-        background: rgba(245, 200, 75, 0.12);
-        color: var(--cms-gold);
+        background: #fff8ee;
+        color: #92400e;
         font-size: 13px;
         text-transform: uppercase;
         border-color: var(--cms-border);
@@ -234,7 +224,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .matrix-table td {
-        background: rgba(255, 255, 255, 0.025);
+        background: #ffffff;
         color: var(--cms-text);
         border-color: var(--cms-border);
         vertical-align: middle;
@@ -242,14 +232,12 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .matrix-table tbody tr:active td {
-        background: rgba(245, 200, 75, 0.12) !important;
+        background: rgba(245, 158, 11, 0.08) !important;
         border-color: var(--cms-gold-border);
     }
 
     .action-card {
-        background:
-            radial-gradient(circle at top right, rgba(245, 200, 75, 0.13), transparent 34%),
-            var(--cms-card);
+        background: linear-gradient(135deg, rgba(245,158,11,0.07), #ffffff);
     }
 
     .form-label {
@@ -259,7 +247,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
     .form-control,
     .form-select {
-        background-color: rgba(255, 255, 255, 0.06);
+        background-color: #fafaf8;
         color: var(--cms-text);
         border: 1px solid var(--cms-border);
         border-radius: 15px;
@@ -269,14 +257,14 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
     .form-control:focus,
     .form-select:focus {
-        background-color: rgba(255, 255, 255, 0.08);
+        background-color: #ffffff;
         color: var(--cms-text);
-        border-color: var(--cms-gold-border);
-        box-shadow: 0 0 0 4px rgba(245, 200, 75, 0.12);
+        border-color: var(--cms-gold);
+        box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.12);
     }
 
     .form-select option {
-        background: #052017;
+        background: #ffffff;
         color: var(--cms-text);
     }
 
@@ -291,26 +279,26 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
     .btn-primary {
         border: none;
-        background: linear-gradient(135deg, #ffe27a, #f0b92e);
-        color: #07331f;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #ffffff;
         box-shadow: var(--cms-gold-shadow);
     }
 
     .btn-primary:hover {
-        color: #07331f;
+        color: #ffffff;
         opacity: 0.96;
         transform: translateY(-2px);
     }
 
     .btn-light {
         border: none;
-        background: linear-gradient(135deg, #ffe27a, #f0b92e);
-        color: #07331f;
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #ffffff;
         font-weight: 900;
     }
 
     .btn-light:hover {
-        color: #07331f;
+        color: #ffffff;
         opacity: 0.96;
         transform: translateY(-2px);
     }
@@ -319,7 +307,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     .btn-outline-dark,
     .btn-outline-warning,
     .btn-secondary {
-        background: rgba(255, 255, 255, 0.055);
+        background: rgba(30, 37, 53, 0.05);
         border: 1px solid var(--cms-border);
         color: var(--cms-text);
     }
@@ -329,15 +317,15 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     .btn-outline-warning:hover,
     .btn-secondary:hover {
         background: var(--cms-gold-soft);
-        color: var(--cms-gold);
+        color: #92400e;
         border-color: var(--cms-gold-border);
         transform: translateY(-2px);
     }
 
     .btn-success {
-        background: rgba(34, 197, 94, 0.18);
-        color: #9af0bf;
-        border: 1px solid rgba(34, 197, 94, 0.28);
+        background: rgba(22, 163, 74, 0.12);
+        color: #15803d;
+        border: 1px solid rgba(22, 163, 74, 0.25);
     }
 
     .btn-success:hover {
@@ -353,28 +341,28 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .alert-success {
-        background: rgba(25, 135, 84, 0.13);
-        color: #9af0bf;
-        border-color: rgba(25, 135, 84, 0.28);
+        background: rgba(22, 163, 74, 0.08);
+        color: #15803d;
+        border-color: rgba(22, 163, 74, 0.22);
     }
 
     .alert-warning {
-        background: rgba(255, 193, 7, 0.13);
-        color: #ffe08a;
-        border-color: rgba(255, 193, 7, 0.28);
+        background: rgba(245, 158, 11, 0.10);
+        color: #92400e;
+        border-color: rgba(245, 158, 11, 0.25);
     }
 
     .alert-danger {
-        background: rgba(220, 53, 69, 0.13);
-        color: #ffb3bd;
-        border-color: rgba(220, 53, 69, 0.30);
+        background: rgba(220, 53, 69, 0.08);
+        color: #b91c1c;
+        border-color: rgba(220, 53, 69, 0.22);
     }
 
     .alert-info,
     .alert-secondary {
-        background: rgba(56, 189, 248, 0.12);
-        color: #b7ecff;
-        border-color: rgba(56, 189, 248, 0.25);
+        background: rgba(14, 165, 233, 0.08);
+        color: #0369a1;
+        border-color: rgba(14, 165, 233, 0.20);
     }
 
     .border {
@@ -399,7 +387,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .bg-primary {
-        background-color: #2563eb !important;
+        background-color: #1e2535 !important;
     }
 
     .bg-secondary {
@@ -407,7 +395,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .bg-dark {
-        background-color: #111827 !important;
+        background-color: #1e2535 !important;
     }
 
     .pdf-hide {
@@ -481,7 +469,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .matrix-table tbody tr:hover {
-        background: rgba(137, 180, 55, 0.7) !important;
+        background: rgba(245, 158, 11, 0.06) !important;
         color: var(--cms-text) !important;
     }
 
@@ -490,7 +478,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     .matrix-table tbody tr:active,
     .matrix-table tbody tr td:focus,
     .matrix-table tbody tr td:active {
-        background: rgba(245, 200, 75, 0.12) !important;
+        background: rgba(245, 158, 11, 0.08) !important;
         color: var(--cms-text) !important;
         outline: none !important;
         box-shadow: none !important;
@@ -499,7 +487,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     /* Bootstrap override */
     .table> :not(caption)>*>*:active,
     .table> :not(caption)>*>*:focus {
-        background-color: rgba(245, 200, 75, 0.12) !important;
+        background-color: rgba(245, 158, 11, 0.08) !important;
         color: var(--cms-text) !important;
     }
 
@@ -923,7 +911,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 $recommendedAction = "Focus on weak subjects, revise important topics, and practice previous question papers.";
             } else {
                 $reasonTags = ["Low Marks", "Weak Subjects", "Poor Preparation", "Needs Parent Follow-up"];
-                $insightComment = "The student’s performance is weak mainly due to lack of consistent preparation, weak subject understanding, insufficient revision, and possible irregular academic involvement.";
+                $insightComment = "The student's performance is weak mainly due to lack of consistent preparation, weak subject understanding, insufficient revision, and possible irregular academic involvement.";
                 $recommendedAction = "Parent meeting, remedial classes, and regular assignment completion should be prioritized.";
             }
 
@@ -1856,7 +1844,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 }
 
                 .main-header {
-                    background: #1e3a8a;
+                    background: #1e2535;
                     color: #ffffff;
                     padding: 18px 22px;
                     border-radius: 10px;
@@ -1894,7 +1882,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 .section-title {
                     margin: 0 0 10px;
                     font-size: 15px;
-                    color: #1e3a8a;
+                    color: #92400e;
                     font-weight: 700;
                     border-bottom: 1px solid #e5e7eb;
                     padding-bottom: 6px;
@@ -1929,8 +1917,8 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 }
 
                 .summary-box {
-                    background: #f8fafc;
-                    border: 1px solid #e5e7eb;
+                    background: #fff8ee;
+                    border: 1px solid #fde68a;
                     border-radius: 8px;
                     padding: 10px;
                 }
@@ -1954,8 +1942,8 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 }
 
                 th {
-                    background: #eff6ff;
-                    color: #1e3a8a;
+                    background: #fff8ee;
+                    color: #92400e;
                     text-align: left;
                     font-weight: 700;
                 }
@@ -1967,8 +1955,8 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 }
 
                 .insight-box {
-                    background: #eff6ff;
-                    border-left: 5px solid #1e3a8a;
+                    background: #fff8ee;
+                    border-left: 5px solid #f59e0b;
                     padding: 11px;
                     border-radius: 8px;
                     line-height: 1.45;

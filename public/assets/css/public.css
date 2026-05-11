@@ -1,24 +1,30 @@
-/* ===== Public Pages: Home + Login - The Obsidian Forest Palette ===== */
+/* ===== Public Pages: Home + Login - Tropical Aqua Palette ===== */
 
 :root {
-    /* Brand Colors - Unique Obsidian & Gold */
-    --brand-primary: #1A4D2E;           /* Hunter Green */
-    --brand-primary-dark: #062C22;      /* Obsidian Green */
-    --brand-accent: #D4AF37;            /* Champagne Gold */
-    --brand-dark: #051A14;              /* Deepest Forest Black */
-    --brand-muted: #5F6F65;             /* Moss Grey */
-    --brand-light: #FBFBF8;             /* Parchment Background */
-    --brand-card: #ffffff;              /* Pure White for cards */
-    
-    /* Warning/Contact Colors - Muted Terracotta */
-    --brand-warning-bg: #FCF5F2;        
-    --brand-warning-border: #BC6C25;    
-    
-    /* Geometry & Style Logic */
-    --radius-lg: 24px;                  /* Modern, high-end rounded corners */
+    /* Main Palette Inspired by Reference */
+    --brand-primary: #00CFC1;
+    /* Bright Aqua */
+    --brand-primary-dark: #00A89A;
+    /* Deep Aqua */
+    --brand-accent: #FFB3B3;
+    /* Soft Pink */
+    --brand-accent-dark: #FF6B6B;
+    /* Darker Pink */
+    --brand-dark: #0ab9b1;
+    /* Dark Navy */
+    --brand-muted: #6B7280;
+    /* Soft Gray */
+    --brand-light: #F8FBFB;
+    /* Light Background */
+    --brand-card: #FFFFFF;
+    /* Warning Colors */
+    --brand-warning-bg: #FFF5F7;
+    --brand-warning-border: #FF6B6B;
+    /* Radius & Shadows */
+    --radius-lg: 24px;
     --radius-md: 12px;
-    --shadow-soft: 0 12px 40px rgba(6, 44, 34, 0.08);
-    --shadow-card: 0 8px 20px rgba(6, 44, 34, 0.06);
+    --shadow-soft: 0 12px 40px rgba(0, 207, 193, 0.10);
+    --shadow-card: 0 8px 24px rgba(0, 207, 193, 0.08);
 }
 
 body {
@@ -27,39 +33,56 @@ body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
+
+/* ================= NAVBAR ================= */
+
 .navbar-brand {
     font-weight: 700;
-    letter-spacing: 0.2px;
-    color: var(--brand-accent) !important; /* Gold Branding */
+    letter-spacing: 0.3px;
+    color: var(--brand-accent) !important;
 }
 
-/* Navbar Logic: Solid Obsidian with Gold border */
 .navbar.bg-dark {
-    background-color: var(--brand-primary-dark) !important;
-    border-bottom: 2px solid var(--brand-accent);
+    background: #1F2937 !important;
+    border-bottom: 2px solid rgba(255, 182, 200, 0.4);
 }
+
+.nav-link {
+    color: #F9FAFB !important;
+    transition: 0.25s ease;
+}
+
+.nav-link:hover {
+    color: var(--brand-accent) !important;
+}
+
+
+/* ================= HERO ================= */
 
 .hero-section {
     min-height: 88vh;
     display: flex;
     align-items: center;
-    background:
-        radial-gradient(circle at top right, rgba(212, 175, 55, 0.12), transparent 25%),
-        linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
-    color: #FBFBF8;
+    overflow: hidden;
+    background: radial-gradient(circle at top right, rgba(255, 182, 200, 0.35), transparent 25%), radial-gradient(circle at bottom left, rgba(255, 182, 200, 0.25), transparent 30%), linear-gradient(135deg, var(--brand-primary), var(--brand-primary-dark));
+    color: #ffffff;
 }
 
 .hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    line-height: 1.15;
+    font-size: 3.2rem;
+    font-weight: 300;
+    line-height: 1.08;
+    letter-spacing: -1px;
 }
 
 .hero-subtitle {
     font-size: 1.1rem;
     max-width: 650px;
-    color: #A9BBAF; /* Moss Tint */
+    color: rgba(255, 255, 255, 0.88);
 }
+
+
+/* ================= CARDS ================= */
 
 .hero-card,
 .team-card,
@@ -68,41 +91,43 @@ body {
 .feature-card {
     border: none;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-soft);
     background: var(--brand-card);
+    box-shadow: var(--shadow-soft);
 }
 
 .feature-card {
-    box-shadow: var(--shadow-card);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
     height: 100%;
-    border: 1px solid #E9EDEA;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(17, 212, 207, 0.08);
 }
 
 .feature-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 15px 30px rgba(6, 44, 34, 0.1);
-    border-color: var(--brand-accent);
+    box-shadow: 0 18px 35px rgba(17, 212, 207, 0.15);
+    border-color: rgba(255, 182, 200, 0.5);
 }
 
 .feature-icon {
     width: 54px;
     height: 54px;
-    border-radius: 16px;
+    border-radius: 18px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: rgba(212, 175, 55, 0.1); /* Gold Tint */
-    color: var(--brand-accent);
+    background: rgba(255, 182, 200, 0.18);
+    color: var(--brand-primary-dark);
     font-size: 1.4rem;
     margin-bottom: 12px;
-    border: 1px solid rgba(212, 175, 55, 0.2);
+    border: 1px solid rgba(255, 182, 200, 0.35);
 }
+
+
+/* ================= TYPOGRAPHY ================= */
 
 .section-title {
     font-weight: 700;
     margin-bottom: 10px;
-    color: var(--brand-primary-dark);
+    color: var(--brand-dark);
 }
 
 .section-subtitle {
@@ -118,7 +143,7 @@ body {
 
 .developer-item {
     padding: 14px 0;
-    border-bottom: 1px solid #EEF1F0;
+    border-bottom: 1px solid #EEF2F7;
 }
 
 .developer-item:last-child {
@@ -135,6 +160,9 @@ body {
     margin-bottom: 0;
 }
 
+
+/* ================= WARNING ================= */
+
 .warning-card {
     background: var(--brand-warning-bg);
     border-left: 6px solid var(--brand-warning-border);
@@ -145,22 +173,23 @@ body {
     color: var(--brand-warning-border);
 }
 
+
+/* ================= PORTAL ================= */
+
 .portal-wrapper {
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 28px 0;
-    background:
-        radial-gradient(circle at top left, rgba(26, 77, 46, 0.08), transparent 30%),
-        linear-gradient(180deg, #FBFBF8 0%, #F1F4F1 100%);
+    background: radial-gradient(circle at top left, rgba(255, 182, 200, 0.2), transparent 30%), linear-gradient(180deg, #F8FBFB 0%, #EFFDFC 100%);
 }
 
 .portal-card {
     width: 100%;
     max-width: 460px;
     padding: 34px;
-    border: 1px solid #E9EDEA;
+    border: 1px solid rgba(17, 212, 207, 0.08);
 }
 
 .portal-card.register-card {
@@ -170,7 +199,7 @@ body {
 .portal-heading {
     font-weight: 700;
     margin-bottom: 6px;
-    color: var(--brand-primary-dark);
+    color: var(--brand-dark);
 }
 
 .portal-subtext {
@@ -178,18 +207,24 @@ body {
     margin-bottom: 24px;
 }
 
+
+/* ================= FORMS ================= */
+
 .form-control,
 .form-select {
     border-radius: 12px;
     padding: 12px 14px;
-    border: 1px solid #D7DCE3;
+    border: 1px solid #DDE5EC;
 }
 
 .form-control:focus,
 .form-select:focus {
-    box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.15);
-    border-color: var(--brand-accent);
+    box-shadow: 0 0 0 0.2rem rgba(17, 212, 207, 0.18);
+    border-color: var(--brand-primary);
 }
+
+
+/* ================= BUTTONS ================= */
 
 .btn {
     border-radius: 12px;
@@ -197,10 +232,10 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Primary buttons become Forest Green */
 .btn-primary {
     background-color: var(--brand-primary);
     border-color: var(--brand-primary);
+    color: white;
 }
 
 .btn-primary:hover {
@@ -209,49 +244,131 @@ body {
     transform: translateY(-2px);
 }
 
-/* Hero "Login" button becomes Champagne Gold */
 .btn-light {
     background-color: var(--brand-accent);
     border-color: var(--brand-accent);
-    color: var(--brand-primary-dark);
+    color: var(--brand-dark);
 }
 
 .btn-light:hover {
-    background-color: #C19A2E;
-    border-color: #C19A2E;
-    color: #fff;
+    background-color: var(--brand-accent-dark);
+    border-color: var(--brand-accent-dark);
+    color: white;
+}
+
+.btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .btn-hero {
     padding: 12px 22px;
 }
 
+
+/* ================= LINKS ================= */
+
 .portal-links a {
-    color: var(--brand-primary);
+    color: var(--brand-primary-dark);
     text-decoration: none;
     font-weight: 600;
 }
 
 .portal-links a:hover {
-    color: var(--brand-accent);
+    color: var(--brand-accent-dark);
 }
 
+
+/* ================= FOOTER ================= */
+
 .public-footer {
-    background: #041410; /* Solid Obsidian */
-    color: #A9BBAF;
-    border-top: 1px solid rgba(212, 175, 55, 0.1);
+    background: #1F2937;
+    color: rgba(255, 255, 255, 0.75);
+    border-top: 1px solid rgba(255, 182, 200, 0.2);
 }
 
 .public-footer small {
     opacity: 0.9;
 }
 
+
+/* ================= RESPONSIVE ================= */
+
 @media (max-width: 992px) {
-    .hero-title { font-size: 2.4rem; }
+    .hero-title {
+        font-size: 2.5rem;
+    }
 }
 
 @media (max-width: 768px) {
-    .hero-section { min-height: auto; padding: 60px 0; }
-    .hero-title { font-size: 2rem; }
-    .portal-card { padding: 24px; }
+    .hero-section {
+        min-height: auto;
+        padding: 60px 0;
+    }
+    .hero-title {
+        font-size: 2rem;
+    }
+    .portal-card {
+        padding: 24px;
+    }
+    /* ===== Login Page Extra Styling ===== */
+    .portal-card {
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+    }
+    /* Pink floating blob */
+    .portal-card::before {
+        content: "";
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        background: rgba(255, 182, 200, 0.22);
+        border-radius: 50%;
+        top: -70px;
+        right: -70px;
+    }
+    /* Aqua floating blob */
+    .portal-card::after {
+        content: "";
+        position: absolute;
+        width: 140px;
+        height: 140px;
+        background: rgba(17, 212, 207, 0.18);
+        border-radius: 50%;
+        bottom: -60px;
+        left: -60px;
+    }
+    .portal-card>* {
+        position: relative;
+        z-index: 2;
+    }
+    .alert {
+        border: none;
+        border-radius: 14px;
+    }
+    .alert-danger {
+        background: #FFF1F4;
+        color: #D6336C;
+    }
+    .alert-warning {
+        background: #FFF8E7;
+        color: #A16207;
+    }
+    .alert-success {
+        background: #ECFDF5;
+        color: #047857;
+    }
+    .form-label {
+        font-weight: 600;
+        color: var(--brand-dark);
+    }
+    .form-control {
+        background: rgba(255, 255, 255, 0.92);
+    }
+    .form-control:hover {
+        border-color: rgba(17, 212, 207, 0.4);
+    }
+    .text-danger {
+        font-size: 0.85rem;
+    }
 }
