@@ -102,92 +102,192 @@
             <form method="POST"
                 action="<?= BASE_URL ?>update-student-performance">
 
-                <input type="hidden"
+                <input
+                    type="hidden"
                     name="student_id"
                     value="<?= $student['id'] ?>">
 
                 <div class="row g-4">
 
-                    <div class="col-md-4">
-                        <label class="form-label">
-                            First IA Marks
+                    <!-- SUBJECT -->
+
+                    <div class="col-md-12">
+
+                        <label class="form-label fw-semibold">
+
+                            Subject
+
                         </label>
 
-                        <input type="number"
+                        <select
+                            name="subject_id"
+                            class="form-select"
+                            required>
+
+                            <option value="">
+                                Select Subject
+                            </option>
+
+                            <?php foreach ($subjects as $subject): ?>
+
+                                <option value="<?= $subject['id'] ?>">
+
+                                    <?= htmlspecialchars(
+                                        $subject['subject_name']
+                                    ) ?>
+
+                                </option>
+
+                            <?php endforeach; ?>
+
+                        </select>
+
+                    </div>
+
+                    <!-- FIRST IA -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+
+                            First IA Marks
+
+                        </label>
+
+                        <input
+                            type="number"
                             name="first_ia"
                             class="form-control"
                             min="0"
                             max="25"
-                            value="<?= htmlspecialchars($performanceData['marks']['First IA'] ?? 0) ?>"
                             required>
+
                     </div>
 
+                    <!-- SECOND IA -->
+
                     <div class="col-md-4">
+
                         <label class="form-label">
+
                             Second IA Marks
+
                         </label>
 
-                        <input type="number"
+                        <input
+                            type="number"
                             name="second_ia"
                             class="form-control"
                             min="0"
                             max="25"
-                            value="<?= htmlspecialchars($performanceData['marks']['Second IA'] ?? 0) ?>"
                             required>
+
                     </div>
 
+                    <!-- MID TERM -->
+
                     <div class="col-md-4">
+
                         <label class="form-label">
+
                             Mid Term Marks
+
                         </label>
 
-                        <input type="number"
+                        <input
+                            type="number"
                             name="mid_term"
                             class="form-control"
                             min="0"
                             max="50"
-                            value="<?= htmlspecialchars($performanceData['marks']['Mid Term'] ?? 0) ?>"
-                            required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">
-                            Attendance Status
-                        </label>
-
-                        <select name="attendance_status"
-                            class="form-select"
                             required>
 
-                            <option value="Present"
-                                <?= (($performanceData['attendance']['status'] ?? '') === 'Present') ? 'selected' : '' ?>>
-                                Present
-                            </option>
-
-                            <option value="Absent"
-                                <?= (($performanceData['attendance']['status'] ?? '') === 'Absent') ? 'selected' : '' ?>>
-                                Absent
-                            </option>
-
-                        </select>
                     </div>
 
-                    <div class="col-12">
+                    <!-- TOTAL CLASSES -->
+
+                    <div class="col-md-4">
+
                         <label class="form-label">
-                            Faculty Remarks
+
+                            Total Classes
+
                         </label>
 
-                        <textarea name="remarks"
-                            rows="4"
+                        <input
+                            type="number"
+                            name="total_classes"
                             class="form-control"
-                            placeholder="Enter faculty remarks"><?= htmlspecialchars($performanceData['note']['note'] ?? '') ?></textarea>
+                            min="0"
+                            required>
+
                     </div>
+
+                    <!-- PRESENT DAYS -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+
+                            Present Days
+
+                        </label>
+
+                        <input
+                            type="number"
+                            name="present_days"
+                            class="form-control"
+                            min="0"
+                            required>
+
+                    </div>
+
+                    <!-- ABSENT DAYS -->
+
+                    <div class="col-md-4">
+
+                        <label class="form-label">
+
+                            Absent Days
+
+                        </label>
+
+                        <input
+                            type="number"
+                            name="absent_days"
+                            class="form-control"
+                            min="0"
+                            required>
+
+                    </div>
+
+                    <!-- REMARKS -->
 
                     <div class="col-12">
 
-                        <button type="submit"
+                        <label class="form-label">
+
+                            Faculty Remarks
+
+                        </label>
+
+                        <textarea
+                            name="remarks"
+                            rows="4"
+                            class="form-control"></textarea>
+
+                    </div>
+
+                    <!-- BUTTON -->
+
+                    <div class="col-12">
+
+                        <button
+                            type="submit"
                             class="btn btn-primary">
+
                             💾 Save Performance
+
                         </button>
 
                     </div>

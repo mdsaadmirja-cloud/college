@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../models/AttendanceModel.php';
+
 
 class StudentPerformanceController
 {
@@ -20,9 +20,6 @@ class StudentPerformanceController
         // EXISTING MODEL
         $this->model =
             new StudentPerformanceModel($db);
-
-        $this->attendanceModel =
-            new AttendanceModel($db);
     }
 
     public function dashboard()
@@ -125,9 +122,13 @@ class StudentPerformanceController
             $students = [];
         } else {
             $students = $this->model->getFilteredStudents(
-                $selectedAcademicYear,
+
+                '',
+
                 $selectedCourseId,
+
                 $selectedSemesterId,
+
                 $selectedSectionId
             );
         }
@@ -325,42 +326,138 @@ class StudentPerformanceController
             redirectTo('manage-student-performance');
         }
 
+        $subjects =
+            $this->model->getFilteredSubjects(
+
+                $student['course_id'],
+
+                $student['semester_id']
+            );
+
         include __DIR__ . '/../views/performance/edit.php';
     }
 
     public function updatePerformance()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+
             redirectTo('manage-student-performance');
         }
 
-        $studentId = (int) ($_POST['student_id'] ?? 0);
+        $studentId =
+            $_POST['student_id'] ?? 0;
 
-        $firstIa = (float) ($_POST['first_ia'] ?? 0);
-        $secondIa = (float) ($_POST['second_ia'] ?? 0);
-        $midTerm = (float) ($_POST['mid_term'] ?? 0);
+        $subjectId =
+            $_POST['subject_id'] ?? 0;
 
-        $attendanceStatus = trim($_POST['attendance_status'] ?? 'Present');
+        $firstIa =
+            $_POST['first_ia'] ?? 0;
 
-        $remarks = trim($_POST['remarks'] ?? '');
+        $secondIa =
+            $_POST['second_ia'] ?? 0;
 
-        if (!$studentId) {
-            redirectTo('manage-student-performance');
+        $midTerm =
+            $_POST['mid_term'] ?? 0;
+
+        $totalClasses =
+            $_POST['total_classes'] ?? 0;
+
+        $presentDays =
+            $_POST['present_days'] ?? 0;
+
+        $absentDays =
+            $_POST['absent_days'] ?? 0;
+
+        $remarks =
+            trim($_POST['remarks'] ?? '');
+
+        /*
+    |--------------------------------------------------------------------------
+    | SAVE MARKS
+    |--------------------------------------------------------------------------
+    */
+
+        $examList =
+            $this->model->getExamList();
+
+        foreach ($examList as $exam) {
+
+            $marksObtained = 0;
+
+            if ($exam['exam_name'] === 'First IA') {
+
+                $marksObtained = $firstIa;
+            } elseif ($exam['exam_name'] === 'Second IA') {
+
+                $marksObtained = $secondIa;
+            } elseif ($exam['exam_name'] === 'Mid Term') {
+
+                $marksObtained = $midTerm;
+            }
+
+            $this->model->updateStudentMark(
+
+                $studentId,
+
+                $subjectId,
+
+                $exam['id'],
+
+                $marksObtained
+            );
         }
 
-        $this->model->updateStudentPerformance(
+        /*
+    |--------------------------------------------------------------------------
+    | SAVE ATTENDANCE
+    |--------------------------------------------------------------------------
+    */
+
+        $this->model->updateSubjectAttendance(
+
             $studentId,
-            $firstIa,
-            $secondIa,
-            $midTerm,
+
+            $subjectId,
+
+            $totalClasses,
+
             $presentDays,
-            $absentDays,
-            $remarks
+
+            $absentDays
         );
 
-        redirectTo('manage-student-performance&updated=1');
-    }
+        /*
+    |--------------------------------------------------------------------------
+    | SAVE NOTE
+    |--------------------------------------------------------------------------
+    */
 
+        if (!empty($remarks)) {
+
+            $facultyId =
+                $_SESSION['user_id'];
+
+            $this->model->saveTeacherNote(
+
+                $studentId,
+
+                $facultyId,
+
+                $remarks
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | REDIRECT
+    |--------------------------------------------------------------------------
+    */
+
+        redirectTo(
+            'student-performance&student_id='
+                . $studentId
+        );
+    }
     public function deletePerformance()
     {
         $studentId = (int) ($_GET['id'] ?? 0);
@@ -372,208 +469,5 @@ class StudentPerformanceController
         $this->model->deleteStudentPerformance($studentId);
 
         redirectTo('manage-student-performance&deleted=1');
-    }
-
-    public function manageAttendance()
-    {
-        $selectedCourseId =
-            $_GET['course_id'] ?? '';
-
-        $selectedSemesterId =
-            $_GET['semester_id'] ?? '';
-
-        $selectedSectionId =
-            $_GET['section_id'] ?? '';
-
-        $selectedSubjectId =
-            $_GET['subject_id'] ?? '';
-
-        /*
-    |--------------------------------------------------------------------------
-    | DROPDOWNS
-    |--------------------------------------------------------------------------
-    */
-
-        $courses =
-            $this->model->getCourses();
-
-        $semesters =
-            $this->model->getSemesters();
-
-        $sections =
-            $this->model->getSections();
-
-        /*
-    |--------------------------------------------------------------------------
-    | LOAD STUDENTS
-    |--------------------------------------------------------------------------
-    */
-
-        $students = [];
-
-        if (
-            $selectedCourseId != ''
-            &&
-            $selectedSemesterId != ''
-            &&
-            $selectedSectionId != ''
-        ) {
-
-            $students =
-                $this->model->getFilteredStudents(
-                    '',
-                    $selectedCourseId,
-                    $selectedSemesterId,
-                    $selectedSectionId
-                );
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | LOAD SUBJECTS
-    |--------------------------------------------------------------------------
-    */
-
-        $subjects = [];
-
-        if (
-            $selectedCourseId != ''
-            &&
-            $selectedSemesterId != ''
-        ) {
-
-            $subjects =
-                $this->model->getFilteredSubjects(
-                    $selectedCourseId,
-                    $selectedSemesterId
-                );
-        }
-
-        include __DIR__ .
-            '/../views/performance/manage_attendence.php';
-    }
-
-    public function saveSubjectAttendance()
-    {
-        /*
-    |--------------------------------------------------------------------------
-    | LOGIN CHECK
-    |--------------------------------------------------------------------------
-    */
-
-        if (!isset($_SESSION['user_id'])) {
-
-            header('Location: ' . BASE_URL . 'login');
-
-            exit();
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | ROLE CHECK
-    |--------------------------------------------------------------------------
-    */
-
-        $role =
-            strtolower($_SESSION['role'] ?? '');
-
-        if ($role !== 'faculty') {
-
-            die("Access denied.");
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | REQUEST CHECK
-    |--------------------------------------------------------------------------
-    */
-
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-
-            header(
-                'Location: ' .
-                    BASE_URL .
-                    'manage-attendance'
-            );
-
-            exit();
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | FORM DATA
-    |--------------------------------------------------------------------------
-    */
-
-        $subjectId =
-            $_POST['subject_id'] ?? '';
-
-        $attendanceData =
-            $_POST['attendance'] ?? [];
-
-        /*
-    |--------------------------------------------------------------------------
-    | VALIDATION
-    |--------------------------------------------------------------------------
-    */
-
-        if (empty($subjectId)) {
-
-            die("Subject is required.");
-        }
-
-        if (empty($attendanceData)) {
-
-            die("Attendance data missing.");
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | SAVE LOOP
-    |--------------------------------------------------------------------------
-    */
-
-        foreach ($attendanceData as $studentId => $row) {
-
-            $total =
-                (int) ($row['total'] ?? 0);
-
-            $present =
-                (int) ($row['present'] ?? 0);
-
-            $absent =
-                (int) ($row['absent'] ?? 0);
-
-            $this->attendanceModel
-                ->saveSubjectAttendance(
-
-                    $studentId,
-
-                    $subjectId,
-
-                    $total,
-
-                    $present,
-
-                    $absent
-                );
-        }
-
-        /*
-    |--------------------------------------------------------------------------
-    | REDIRECT
-    |--------------------------------------------------------------------------
-    */
-
-        header(
-
-            'Location: ' .
-
-                BASE_URL .
-
-                'manage-attendance?saved=1'
-        );
-
-        exit();
     }
 }

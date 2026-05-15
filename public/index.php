@@ -264,47 +264,6 @@ switch ($url) {
         $performanceController->saveAttendance();
         break;
 
-    case 'manage-attendance':
-
-        if (!isset($_SESSION['user_id'])) {
-            redirectTo('login');
-        }
-
-        $role =
-            strtolower($_SESSION['role'] ?? '');
-
-        if ($role !== 'faculty') {
-            redirectTo('dashboard');
-        }
-
-        $controller =
-            new StudentPerformanceController($db);
-
-        $controller->manageAttendance();
-
-
-        break;
-
-    case 'save-subject-attendance':
-
-        if (!isset($_SESSION['user_id'])) {
-            redirectTo('login');
-        }
-
-        $role =
-            strtolower($_SESSION['role'] ?? '');
-
-        if ($role !== 'faculty') {
-            redirectTo('dashboard');
-        }
-
-        $controller =
-            new StudentPerformanceController($db);
-
-        $controller->saveSubjectAttendance();
-
-        break;
-
 
     case 'update-student-performance':
 

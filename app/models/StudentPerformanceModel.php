@@ -15,38 +15,132 @@ class StudentPerformanceModel
         SELECT 
             s.id,
             s.candidate_name,
+
             COUNT(DISTINCT m.subject_id) AS total_subjects,
+
             COUNT(DISTINCT m.exam_id) AS total_exams,
-            ROUND(SUM(m.marks_obtained), 2) AS total_obtained,
-            ROUND(SUM(e.total_marks), 2) AS total_marks,
-            ROUND((SUM(m.marks_obtained) / SUM(e.total_marks)) * 100, 2) AS avg_marks
+
+            COALESCE(
+                ROUND(SUM(m.marks_obtained), 2),
+                0
+            ) AS total_obtained,
+
+            COALESCE(
+                ROUND(SUM(e.total_marks), 2),
+                0
+            ) AS total_marks,
+
+            COALESCE(
+                ROUND(
+                    (
+                        SUM(m.marks_obtained)
+                        /
+                        NULLIF(SUM(e.total_marks), 0)
+                    ) * 100,
+                    2
+                ),
+                0
+            ) AS avg_marks
+
         FROM students s
-        LEFT JOIN marks m ON s.id = m.student_id
-        LEFT JOIN exams e ON m.exam_id = e.id
+
+        LEFT JOIN marks m
+            ON s.id = m.student_id
+
+        LEFT JOIN exams e
+            ON m.exam_id = e.id
+            AND e.exam_name IN (
+                'First IA',
+                'Second IA',
+                'Mid Term'
+            )
+
         WHERE s.id = ?
-        AND e.exam_name IN ('First IA', 'Second IA', 'Mid Term')
-        GROUP BY s.id, s.candidate_name
+
+        GROUP BY
+            s.id,
+            s.candidate_name
     ";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt =
+            $this->conn->prepare($sql);
+
         $stmt->execute([$studentId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return
+            $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getAttendancePercentage($studentId)
-    {
-        $sql = "
-            SELECT 
-                COUNT(*) AS total_days,
-                SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) AS present_days,
-                ROUND((SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) AS attendance_percentage
-            FROM attendance
-            WHERE student_id = ?
-        ";
+    public function getAttendancePercentage(
+        $studentId,
+        $subjectId = null
+    ) {
+        $params = [$studentId];
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute([$studentId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $subjectCondition = "";
+
+        if (!empty($subjectId)) {
+
+            $subjectCondition =
+                " AND subject_id = ? ";
+
+            $params[] = $subjectId;
+        }
+
+        $sql = "
+
+        SELECT
+
+            COALESCE(
+                SUM(total_classes),
+                0
+            ) AS total_days,
+
+            COALESCE(
+                SUM(present_days),
+                0
+            ) AS present_days,
+
+            COALESCE(
+                SUM(absent_days),
+                0
+            ) AS absent_days,
+
+            COALESCE(
+
+                ROUND(
+
+                    (
+                        SUM(present_days)
+                        /
+                        NULLIF(
+                            SUM(total_classes),
+                            0
+                        )
+                    ) * 100,
+
+                    2
+
+                ),
+
+                0
+
+            ) AS attendance_percentage
+
+        FROM subject_attendance
+
+        WHERE student_id = ?
+
+        $subjectCondition
+    ";
+
+        $stmt =
+            $this->conn->prepare($sql);
+
+        $stmt->execute($params);
+
+        return
+            $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function getWeakSubjects($studentId)
@@ -423,65 +517,153 @@ class StudentPerformanceModel
             $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getFilteredSubjects($courseId = '', $semesterId = '')
-    {
-        $sql = "
-        SELECT id, subject_name
+    public function getFilteredSubjects(
+        $courseId,
+        $semesterId
+    ) {
+        $query = "
+
+        SELECT
+            id,
+            subject_name,
+            course_id,
+            semester_id
+
         FROM subjects
-        WHERE 1=1
+
+        WHERE
+            course_id = :course_id
+
+        AND
+            semester_id = :semester_id
+
+        ORDER BY subject_name ASC
     ";
 
-        $params = [];
+        $stmt =
+            $this->conn->prepare($query);
 
-        if (!empty($courseId)) {
-            $sql .= " AND course_id = ? ";
-            $params[] = $courseId;
-        }
+        $stmt->execute([
 
-        if (!empty($semesterId)) {
-            $sql .= " AND semester_id = ? ";
-            $params[] = $semesterId;
-        }
+            'course_id' => $courseId,
 
-        $sql .= " ORDER BY subject_name ASC ";
+            'semester_id' => $semesterId
+        ]);
 
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return
+            $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getAdminSemesterSummary($academicYear = '', $courseId = '', $semesterId = '')
-    {
+    public function getAdminSemesterSummary(
+        $academicYear = '',
+        $courseId = '',
+        $semesterId = ''
+    ) {
         $sql = "
+
         SELECT
-            COUNT(DISTINCT s.id) AS total_students,
 
-            ROUND(AVG(student_result.percentage), 2) AS semester_average,
+            COUNT(DISTINCT s.id)
+                AS total_students,
 
-            SUM(CASE WHEN student_result.percentage >= 35 THEN 1 ELSE 0 END) AS pass_count,
-            SUM(CASE WHEN student_result.percentage < 35 THEN 1 ELSE 0 END) AS fail_count,
+            ROUND(
+                AVG(student_result.percentage),
+                2
+            ) AS semester_average,
 
-            ROUND(AVG(att_result.attendance_percentage), 2) AS average_attendance
+            SUM(
+                CASE
+                    WHEN student_result.percentage >= 35
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS pass_count,
+
+            SUM(
+                CASE
+                    WHEN student_result.percentage < 35
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS fail_count,
+
+            ROUND(
+                AVG(att_result.attendance_percentage),
+                2
+            ) AS average_attendance
 
         FROM students s
 
-        LEFT JOIN (
-            SELECT 
-                m.student_id,
-                ROUND((SUM(m.marks_obtained) / SUM(e.total_marks)) * 100, 2) AS percentage
-            FROM marks m
-            INNER JOIN exams e ON m.exam_id = e.id
-            WHERE e.exam_name IN ('First IA', 'Second IA', 'Mid Term')
-            GROUP BY m.student_id
-        ) student_result ON student_result.student_id = s.id
+        /* MARKS SUMMARY */
 
         LEFT JOIN (
-            SELECT 
+
+            SELECT
+
+                m.student_id,
+
+                ROUND(
+
+                    (
+                        SUM(m.marks_obtained)
+                        /
+                        NULLIF(
+                            SUM(e.total_marks),
+                            0
+                        )
+                    ) * 100,
+
+                    2
+
+                ) AS percentage
+
+            FROM marks m
+
+            INNER JOIN exams e
+                ON m.exam_id = e.id
+
+            WHERE e.exam_name IN (
+                'First IA',
+                'Second IA',
+                'Mid Term'
+            )
+
+            GROUP BY m.student_id
+
+        ) student_result
+
+        ON student_result.student_id = s.id
+
+        /* ATTENDANCE SUMMARY */
+
+        LEFT JOIN (
+
+            SELECT
+
                 student_id,
-                ROUND((SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) AS attendance_percentage
-            FROM attendance
+
+                ROUND(
+
+                    (
+                        SUM(present_days)
+                        /
+                        NULLIF(
+                            SUM(total_classes),
+                            0
+                        )
+                    ) * 100,
+
+                    2
+
+                ) AS attendance_percentage
+
+            FROM subject_attendance
+
             GROUP BY student_id
-        ) att_result ON att_result.student_id = s.id
+
+        ) att_result
+
+        ON att_result.student_id = s.id
 
         WHERE 1=1
     ";
@@ -489,60 +671,154 @@ class StudentPerformanceModel
         $params = [];
 
         if (!empty($academicYear)) {
+
             $sql .= " AND s.academic_year = ? ";
+
             $params[] = $academicYear;
         }
 
         if (!empty($courseId)) {
+
             $sql .= " AND s.course_id = ? ";
+
             $params[] = $courseId;
         }
 
         if (!empty($semesterId)) {
+
             $sql .= " AND s.semester_id = ? ";
+
             $params[] = $semesterId;
         }
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt =
+            $this->conn->prepare($sql);
+
         $stmt->execute($params);
 
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        return
+            $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function getAdminSemesterComparison($academicYear = '', $courseId = '', $semesterId = '')
-    {
+    public function getAdminSemesterComparison(
+        $academicYear = '',
+        $courseId = '',
+        $semesterId = ''
+    ) {
         $sql = "
+
         SELECT
+
             sem.id AS semester_id,
+
             sem.semester_number,
+
             sem.semester_name,
-            COUNT(DISTINCT s.id) AS total_students,
-            ROUND(AVG(student_result.percentage), 2) AS semester_average,
-            SUM(CASE WHEN student_result.percentage >= 35 THEN 1 ELSE 0 END) AS pass_count,
-            SUM(CASE WHEN student_result.percentage < 35 THEN 1 ELSE 0 END) AS fail_count,
-            ROUND(AVG(att_result.attendance_percentage), 2) AS average_attendance
+
+            COUNT(DISTINCT s.id)
+                AS total_students,
+
+            ROUND(
+                AVG(student_result.percentage),
+                2
+            ) AS semester_average,
+
+            SUM(
+                CASE
+                    WHEN student_result.percentage >= 35
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS pass_count,
+
+            SUM(
+                CASE
+                    WHEN student_result.percentage < 35
+                    THEN 1
+                    ELSE 0
+                END
+            ) AS fail_count,
+
+            ROUND(
+                AVG(att_result.attendance_percentage),
+                2
+            ) AS average_attendance
 
         FROM semesters sem
 
-        LEFT JOIN students s ON s.semester_id = sem.id
+        LEFT JOIN students s
+            ON s.semester_id = sem.id
+
+        /* MARKS SUMMARY */
 
         LEFT JOIN (
-            SELECT 
+
+            SELECT
+
                 m.student_id,
-                ROUND((SUM(m.marks_obtained) / SUM(e.total_marks)) * 100, 2) AS percentage
+
+                ROUND(
+
+                    (
+                        SUM(m.marks_obtained)
+                        /
+                        NULLIF(
+                            SUM(e.total_marks),
+                            0
+                        )
+                    ) * 100,
+
+                    2
+
+                ) AS percentage
+
             FROM marks m
-            INNER JOIN exams e ON m.exam_id = e.id
-            WHERE e.exam_name IN ('First IA', 'Second IA', 'Mid Term')
+
+            INNER JOIN exams e
+                ON m.exam_id = e.id
+
+            WHERE e.exam_name IN (
+                'First IA',
+                'Second IA',
+                'Mid Term'
+            )
+
             GROUP BY m.student_id
-        ) student_result ON student_result.student_id = s.id
+
+        ) student_result
+
+        ON student_result.student_id = s.id
+
+        /* ATTENDANCE SUMMARY */
 
         LEFT JOIN (
-            SELECT 
+
+            SELECT
+
                 student_id,
-                ROUND((SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) / COUNT(*)) * 100, 2) AS attendance_percentage
-            FROM attendance
+
+                ROUND(
+
+                    (
+                        SUM(present_days)
+                        /
+                        NULLIF(
+                            SUM(total_classes),
+                            0
+                        )
+                    ) * 100,
+
+                    2
+
+                ) AS attendance_percentage
+
+            FROM subject_attendance
+
             GROUP BY student_id
-        ) att_result ON att_result.student_id = s.id
+
+        ) att_result
+
+        ON att_result.student_id = s.id
 
         WHERE sem.status = 1
     ";
@@ -550,29 +826,43 @@ class StudentPerformanceModel
         $params = [];
 
         if (!empty($academicYear)) {
+
             $sql .= " AND s.academic_year = ? ";
+
             $params[] = $academicYear;
         }
 
         if (!empty($semesterId)) {
+
             $sql .= " AND sem.id = ? ";
+
             $params[] = $semesterId;
         }
 
         if (!empty($courseId)) {
+
             $sql .= " AND s.course_id = ? ";
+
             $params[] = $courseId;
         }
 
         $sql .= "
-        GROUP BY sem.id, sem.semester_number, sem.semester_name
+
+        GROUP BY
+            sem.id,
+            sem.semester_number,
+            sem.semester_name
+
         ORDER BY sem.semester_number ASC
     ";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt =
+            $this->conn->prepare($sql);
+
         $stmt->execute($params);
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return
+            $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getTeacherNote($studentId)
@@ -709,6 +999,7 @@ class StudentPerformanceModel
 
     public function updateStudentPerformance(
         $studentId,
+        $subjectId,
         $firstIa,
         $secondIa,
         $midTerm,
@@ -733,13 +1024,18 @@ class StudentPerformanceModel
             LIMIT 1
         ";
 
-            $attendanceCheckStmt = $this->conn->prepare($attendanceCheckQuery);
+            $attendanceCheckStmt =
+                $this->conn->prepare($attendanceCheckQuery);
 
-            $attendanceCheckStmt->bindParam(':student_id', $studentId);
+            $attendanceCheckStmt->bindParam(
+                ':student_id',
+                $studentId
+            );
 
             $attendanceCheckStmt->execute();
 
-            $existingAttendance = $attendanceCheckStmt->fetch(PDO::FETCH_ASSOC);
+            $existingAttendance =
+                $attendanceCheckStmt->fetch(PDO::FETCH_ASSOC);
 
             if ($existingAttendance) {
 
@@ -749,10 +1045,18 @@ class StudentPerformanceModel
                 WHERE student_id = :student_id
             ";
 
-                $attendanceUpdateStmt = $this->conn->prepare($attendanceUpdateQuery);
+                $attendanceUpdateStmt =
+                    $this->conn->prepare($attendanceUpdateQuery);
 
-                $attendanceUpdateStmt->bindParam(':status', $attendanceStatus);
-                $attendanceUpdateStmt->bindParam(':student_id', $studentId);
+                $attendanceUpdateStmt->bindParam(
+                    ':status',
+                    $attendanceStatus
+                );
+
+                $attendanceUpdateStmt->bindParam(
+                    ':student_id',
+                    $studentId
+                );
 
                 $attendanceUpdateStmt->execute();
             } else {
@@ -768,10 +1072,18 @@ class StudentPerformanceModel
                 )
             ";
 
-                $attendanceInsertStmt = $this->conn->prepare($attendanceInsertQuery);
+                $attendanceInsertStmt =
+                    $this->conn->prepare($attendanceInsertQuery);
 
-                $attendanceInsertStmt->bindParam(':student_id', $studentId);
-                $attendanceInsertStmt->bindParam(':status', $attendanceStatus);
+                $attendanceInsertStmt->bindParam(
+                    ':student_id',
+                    $studentId
+                );
+
+                $attendanceInsertStmt->bindParam(
+                    ':status',
+                    $attendanceStatus
+                );
 
                 $attendanceInsertStmt->execute();
             }
@@ -784,7 +1096,8 @@ class StudentPerformanceModel
 
             if (!empty($remarks)) {
 
-                $facultyId = $_SESSION['user_id'] ?? null;
+                $facultyId =
+                    $_SESSION['user_id'] ?? null;
 
                 $noteQuery = "
                 INSERT INTO student_teacher_notes (
@@ -803,11 +1116,23 @@ class StudentPerformanceModel
                 )
             ";
 
-                $noteStmt = $this->conn->prepare($noteQuery);
+                $noteStmt =
+                    $this->conn->prepare($noteQuery);
 
-                $noteStmt->bindParam(':student_id', $studentId);
-                $noteStmt->bindParam(':faculty_id', $facultyId);
-                $noteStmt->bindParam(':note', $remarks);
+                $noteStmt->bindParam(
+                    ':student_id',
+                    $studentId
+                );
+
+                $noteStmt->bindParam(
+                    ':faculty_id',
+                    $facultyId
+                );
+
+                $noteStmt->bindParam(
+                    ':note',
+                    $remarks
+                );
 
                 $noteStmt->execute();
             }
@@ -819,8 +1144,11 @@ class StudentPerformanceModel
         */
 
             $marks = [
+
                 'First IA'  => $firstIa,
+
                 'Second IA' => $secondIa,
+
                 'Mid Term'  => $midTerm
             ];
 
@@ -839,43 +1167,25 @@ class StudentPerformanceModel
                 LIMIT 1
             ";
 
-                $examStmt = $this->conn->prepare($examQuery);
+                $examStmt =
+                    $this->conn->prepare($examQuery);
 
-                $examStmt->bindParam(':exam_name', $examName);
+                $examStmt->bindParam(
+                    ':exam_name',
+                    $examName
+                );
 
                 $examStmt->execute();
 
-                $exam = $examStmt->fetch(PDO::FETCH_ASSOC);
+                $exam =
+                    $examStmt->fetch(PDO::FETCH_ASSOC);
 
                 if (!$exam) {
                     continue;
                 }
 
-                $examId = $exam['id'];
-
-                /*
-            |--------------------------------------------------------------------------
-            | GET SUBJECT ID
-            |--------------------------------------------------------------------------
-            */
-
-                $subjectQuery = "
-                SELECT id
-                FROM subjects
-                LIMIT 1
-            ";
-
-                $subjectStmt = $this->conn->prepare($subjectQuery);
-
-                $subjectStmt->execute();
-
-                $subject = $subjectStmt->fetch(PDO::FETCH_ASSOC);
-
-                if (!$subject) {
-                    continue;
-                }
-
-                $subjectId = $subject['id'];
+                $examId =
+                    $exam['id'];
 
                 /*
             |--------------------------------------------------------------------------
@@ -892,15 +1202,28 @@ class StudentPerformanceModel
                 LIMIT 1
             ";
 
-                $checkStmt = $this->conn->prepare($checkQuery);
+                $checkStmt =
+                    $this->conn->prepare($checkQuery);
 
-                $checkStmt->bindParam(':student_id', $studentId);
-                $checkStmt->bindParam(':subject_id', $subjectId);
-                $checkStmt->bindParam(':exam_id', $examId);
+                $checkStmt->bindParam(
+                    ':student_id',
+                    $studentId
+                );
+
+                $checkStmt->bindParam(
+                    ':subject_id',
+                    $subjectId
+                );
+
+                $checkStmt->bindParam(
+                    ':exam_id',
+                    $examId
+                );
 
                 $checkStmt->execute();
 
-                $existingMark = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                $existingMark =
+                    $checkStmt->fetch(PDO::FETCH_ASSOC);
 
                 /*
             |--------------------------------------------------------------------------
@@ -916,10 +1239,18 @@ class StudentPerformanceModel
                     WHERE id = :id
                 ";
 
-                    $updateStmt = $this->conn->prepare($updateQuery);
+                    $updateStmt =
+                        $this->conn->prepare($updateQuery);
 
-                    $updateStmt->bindParam(':marks_obtained', $score);
-                    $updateStmt->bindParam(':id', $existingMark['id']);
+                    $updateStmt->bindParam(
+                        ':marks_obtained',
+                        $score
+                    );
+
+                    $updateStmt->bindParam(
+                        ':id',
+                        $existingMark['id']
+                    );
 
                     $updateStmt->execute();
                 } else {
@@ -945,12 +1276,28 @@ class StudentPerformanceModel
                     )
                 ";
 
-                    $insertStmt = $this->conn->prepare($insertQuery);
+                    $insertStmt =
+                        $this->conn->prepare($insertQuery);
 
-                    $insertStmt->bindParam(':student_id', $studentId);
-                    $insertStmt->bindParam(':subject_id', $subjectId);
-                    $insertStmt->bindParam(':exam_id', $examId);
-                    $insertStmt->bindParam(':marks_obtained', $score);
+                    $insertStmt->bindParam(
+                        ':student_id',
+                        $studentId
+                    );
+
+                    $insertStmt->bindParam(
+                        ':subject_id',
+                        $subjectId
+                    );
+
+                    $insertStmt->bindParam(
+                        ':exam_id',
+                        $examId
+                    );
+
+                    $insertStmt->bindParam(
+                        ':marks_obtained',
+                        $score
+                    );
 
                     $insertStmt->execute();
                 }
@@ -965,6 +1312,128 @@ class StudentPerformanceModel
 
             return false;
         }
+    }
+
+    public function updateSubjectAttendance(
+        $studentId,
+        $subjectId,
+        $totalClasses,
+        $presentDays,
+        $absentDays
+    ) {
+
+        /*
+    |--------------------------------------------------------------------------
+    | CHECK EXISTING RECORD
+    |--------------------------------------------------------------------------
+    */
+
+        $checkQuery = "
+
+        SELECT id
+
+        FROM subject_attendance
+
+        WHERE student_id = :student_id
+
+        AND subject_id = :subject_id
+
+        LIMIT 1
+    ";
+
+        $checkStmt =
+            $this->conn->prepare($checkQuery);
+
+        $checkStmt->execute([
+
+            'student_id' => $studentId,
+
+            'subject_id' => $subjectId
+        ]);
+
+        $existing =
+            $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+        /*
+    |--------------------------------------------------------------------------
+    | UPDATE EXISTING
+    |--------------------------------------------------------------------------
+    */
+
+        if ($existing) {
+
+            $updateQuery = "
+
+            UPDATE subject_attendance
+
+            SET
+                total_classes = :total_classes,
+
+                present_days = :present_days,
+
+                absent_days = :absent_days
+
+            WHERE id = :id
+        ";
+
+            $updateStmt =
+                $this->conn->prepare($updateQuery);
+
+            return $updateStmt->execute([
+
+                'total_classes' => $totalClasses,
+
+                'present_days' => $presentDays,
+
+                'absent_days' => $absentDays,
+
+                'id' => $existing['id']
+            ]);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | INSERT NEW
+    |--------------------------------------------------------------------------
+    */
+
+        $insertQuery = "
+
+        INSERT INTO subject_attendance (
+
+            student_id,
+            subject_id,
+            total_classes,
+            present_days,
+            absent_days
+
+        )
+
+        VALUES (
+
+            :student_id,
+            :subject_id,
+            :total_classes,
+            :present_days,
+            :absent_days
+        )
+    ";
+
+        $insertStmt =
+            $this->conn->prepare($insertQuery);
+
+        return $insertStmt->execute([
+
+            'student_id' => $studentId,
+
+            'subject_id' => $subjectId,
+
+            'total_classes' => $totalClasses,
+
+            'present_days' => $presentDays,
+
+            'absent_days' => $absentDays
+        ]);
     }
 
     public function deleteStudentPerformance($studentId)
@@ -1040,26 +1509,47 @@ class StudentPerformanceModel
         $data = [];
 
         /*
-    |--------------------------------------------------------------------------
-    | ATTENDANCE
-    |--------------------------------------------------------------------------
-    */
+|--------------------------------------------------------------------------
+| SUBJECT ATTENDANCE
+|--------------------------------------------------------------------------
+*/
 
         $attendanceQuery = "
-    SELECT status
-    FROM attendance
+
+    SELECT
+
+        COALESCE(
+            SUM(total_classes),
+            0
+        ) AS total_classes,
+
+        COALESCE(
+            SUM(present_days),
+            0
+        ) AS present_days,
+
+        COALESCE(
+            SUM(absent_days),
+            0
+        ) AS absent_days
+
+    FROM subject_attendance
+
     WHERE student_id = :student_id
-    ORDER BY id DESC
-    LIMIT 1
 ";
 
-        $attendanceStmt = $this->conn->prepare($attendanceQuery);
+        $attendanceStmt =
+            $this->conn->prepare($attendanceQuery);
 
-        $attendanceStmt->bindParam(':student_id', $studentId);
+        $attendanceStmt->bindParam(
+            ':student_id',
+            $studentId
+        );
 
         $attendanceStmt->execute();
 
-        $data['attendance'] = $attendanceStmt->fetch(PDO::FETCH_ASSOC);
+        $data['attendance'] =
+            $attendanceStmt->fetch(PDO::FETCH_ASSOC);
 
         /*
     |--------------------------------------------------------------------------
