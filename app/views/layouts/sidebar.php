@@ -5,13 +5,13 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
 
 <style>
     :root {
-        --side-gold:        #f59e0b;
-        --side-gold-soft:   rgba(245, 158, 11, 0.12);
+        --side-gold: #f59e0b;
+        --side-gold-soft: rgba(245, 158, 11, 0.12);
         --side-gold-border: rgba(245, 158, 11, 0.28);
-        --side-text:        #f5f0e8;
-        --side-muted:       rgba(245, 240, 232, 0.60);
-        --side-border:      rgba(255, 255, 255, 0.08);
-        --side-shadow:      0 24px 70px rgba(0, 0, 0, 0.32);
+        --side-text: #f5f0e8;
+        --side-muted: rgba(245, 240, 232, 0.60);
+        --side-border: rgba(255, 255, 255, 0.08);
+        --side-shadow: 0 24px 70px rgba(0, 0, 0, 0.32);
     }
 
     .main-wrapper {
@@ -23,18 +23,17 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
     /* ── Sidebar ── */
     .sidebar {
         width: 280px;
-        min-height: 100vh;
-        position: sticky;
+        height: 100vh;
+        position: fixed;
         top: 0;
-        align-self: flex-start;
+        left: 0;
         background: linear-gradient(180deg, #1e2535 0%, #16202e 100%);
-        border-right: 1px solid rgba(255,255,255,0.06);
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
         padding: 20px 14px;
         box-shadow: var(--side-shadow);
         z-index: 1000;
         transition: 0.3s ease;
         overflow-y: auto;
-        max-height: 100vh;
     }
 
     .sidebar-brand {
@@ -61,7 +60,7 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         font-weight: 900;
         font-size: 20px;
         flex-shrink: 0;
-        box-shadow: 0 6px 20px rgba(245,158,11,0.35);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
     }
 
     .sidebar-brand-text {
@@ -99,7 +98,7 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
 
     .sidebar a:hover {
         color: var(--side-text);
-        background: rgba(245,158,11,0.08);
+        background: rgba(245, 158, 11, 0.08);
         border-color: var(--side-gold-border);
         transform: translateX(4px);
     }
@@ -108,10 +107,12 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         color: #1e2535;
         background: linear-gradient(135deg, #f59e0b, #fbbf24);
         border-color: transparent;
-        box-shadow: 0 6px 20px rgba(245,158,11,0.28);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.28);
     }
 
-    .sidebar a.active i { color: #1e2535; }
+    .sidebar a.active i {
+        color: #1e2535;
+    }
 
     .sidebar a.active::before {
         content: "";
@@ -122,15 +123,24 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         width: 4px;
         border-radius: 50px;
         background: #f59e0b;
-        box-shadow: 0 0 12px rgba(245,158,11,0.70);
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.70);
     }
 
     /* Submenu */
-    .menu-group { margin-bottom: 6px; }
+    .menu-group {
+        margin-bottom: 6px;
+    }
 
-    .menu-toggle { justify-content: space-between; cursor: pointer; }
+    .menu-toggle {
+        justify-content: space-between;
+        cursor: pointer;
+    }
 
-    .menu-left { display: flex; align-items: center; gap: 12px; }
+    .menu-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
     .menu-toggle::after {
         content: "\F282";
@@ -140,9 +150,16 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         transition: 0.3s ease;
     }
 
-    .menu-toggle.active::after { transform: rotate(180deg); }
+    .menu-toggle.active::after {
+        transform: rotate(180deg);
+    }
 
-    .submenu-items { display: none; padding-left: 10px; margin-top: 4px; margin-bottom: 6px; }
+    .submenu-items {
+        display: none;
+        padding-left: 10px;
+        margin-top: 4px;
+        margin-bottom: 6px;
+    }
 
     .submenu-items.show {
         display: block;
@@ -154,33 +171,46 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         font-size: 13px;
         padding: 9px 12px;
         margin-bottom: 4px;
-        background: rgba(245,158,11,0.05);
+        background: rgba(245, 158, 11, 0.05);
     }
 
     /* Logout */
     .sidebar a[href*="logout"] {
         margin-top: 14px;
         color: #fca5a5;
-        background: rgba(220,53,69,0.08);
-        border-color: rgba(220,53,69,0.16);
+        background: rgba(220, 53, 69, 0.08);
+        border-color: rgba(220, 53, 69, 0.16);
     }
 
-    .sidebar a[href*="logout"] i { color: #fca5a5; }
+    .sidebar a[href*="logout"] i {
+        color: #fca5a5;
+    }
 
     .sidebar a[href*="logout"]:hover {
-        background: rgba(220,53,69,0.15);
-        border-color: rgba(220,53,69,0.28);
+        background: rgba(220, 53, 69, 0.15);
+        border-color: rgba(220, 53, 69, 0.28);
         color: #fecaca;
         transform: none;
     }
 
     /* ── Content ── */
     .content-area {
+
         flex: 1;
+
+        margin-left: 280px;
+
         min-width: 0;
+
+        min-height: 100vh;
+
         background: #f8f7f4;
+
         display: flex;
+
         flex-direction: column;
+
+        overflow-x: hidden;
     }
 
     /* ── Topbar ── */
@@ -190,21 +220,28 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         z-index: 900;
         min-height: 72px;
         padding: 16px 24px;
-        background: rgba(248,247,244,0.94);
+        background: rgba(248, 247, 244, 0.94);
         backdrop-filter: blur(16px);
         border-bottom: 1px solid #e8e4dc;
     }
 
-    .topbar h5 { color: #1a1a2e; font-weight: 900; letter-spacing: -0.02em; }
+    .topbar h5 {
+        color: #1a1a2e;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+    }
 
     .topbar small,
-    .topbar .text-muted { color: #7a7a8a !important; font-weight: 600; }
+    .topbar .text-muted {
+        color: #7a7a8a !important;
+        font-weight: 600;
+    }
 
     .toggle-btn {
         width: 44px;
         height: 44px;
         border-radius: 14px;
-        border: 1px solid rgba(245,158,11,0.28);
+        border: 1px solid rgba(245, 158, 11, 0.28);
         background: #fff8ee;
         color: #d97706;
         display: grid;
@@ -223,7 +260,7 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
 
     .admin-menu-btn {
         background: #fff8ee !important;
-        border: 1px solid rgba(245,158,11,0.28) !important;
+        border: 1px solid rgba(245, 158, 11, 0.28) !important;
         color: #d97706 !important;
         border-radius: 50px;
         padding: 10px 18px;
@@ -240,7 +277,7 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         background: #ffffff;
         border: 1px solid #e8e4dc;
         border-radius: 14px;
-        box-shadow: 0 12px 32px rgba(30,37,53,0.12);
+        box-shadow: 0 12px 32px rgba(30, 37, 53, 0.12);
         padding: 8px;
     }
 
@@ -251,25 +288,65 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
         padding: 10px 12px;
     }
 
-    .dropdown-item:hover { background: #fff8ee; color: #d97706; }
-    .dropdown-item.text-danger { color: #dc2626 !important; }
-    .dropdown-item.text-danger:hover { background: #fef2f2 !important; }
+    .dropdown-item:hover {
+        background: #fff8ee;
+        color: #d97706;
+    }
 
-    .page-content { padding: 28px; flex: 1; }
+    .dropdown-item.text-danger {
+        color: #dc2626 !important;
+    }
+
+    .dropdown-item.text-danger:hover {
+        background: #fef2f2 !important;
+    }
+
+    .page-content {
+        padding: 28px;
+        flex: 1;
+    }
 
     /* ── Collapsed ── */
-    body.sidebar-collapsed .sidebar { width: 82px; }
-    body.sidebar-collapsed .sidebar-brand { justify-content: center; padding: 0; }
+    body.sidebar-collapsed .sidebar {
+        width: 82px;
+    }
+
+    body.sidebar-collapsed .content-area {
+        margin-left: 82px;
+    }
+
+    body.sidebar-collapsed .sidebar-brand {
+        justify-content: center;
+        padding: 0;
+    }
+
     body.sidebar-collapsed .sidebar-brand-text,
-    body.sidebar-collapsed .link-text { display: none; }
-    body.sidebar-collapsed .sidebar a { justify-content: center; padding: 12px; }
-    body.sidebar-collapsed .sidebar a.active::before { left: -14px; }
-    body.sidebar-collapsed .menu-toggle::after { display: none; }
-    body.sidebar-collapsed .submenu-items { padding-left: 0; }
+    body.sidebar-collapsed .link-text {
+        display: none;
+    }
+
+    body.sidebar-collapsed .sidebar a {
+        justify-content: center;
+        padding: 12px;
+    }
+
+    body.sidebar-collapsed .sidebar a.active::before {
+        left: -14px;
+    }
+
+    body.sidebar-collapsed .menu-toggle::after {
+        display: none;
+    }
+
+    body.sidebar-collapsed .submenu-items {
+        padding-left: 0;
+    }
 
     /* ── Mobile ── */
     @media (max-width: 991px) {
-        .main-wrapper { display: block; }
+        .main-wrapper {
+            display: block;
+        }
 
         .sidebar {
             position: fixed;
@@ -280,20 +357,69 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
             transition: 0.3s ease;
         }
 
-        body.sidebar-open .sidebar { left: 0; }
-        body.sidebar-collapsed .sidebar { width: 280px; }
-        body.sidebar-collapsed .sidebar-brand-text,
-        body.sidebar-collapsed .link-text { display: inline; }
-        body.sidebar-collapsed .sidebar a { justify-content: flex-start; }
+        body.sidebar-open .sidebar {
+            left: 0;
+        }
 
-        .content-area { width: 100%; }
-        .topbar { padding: 14px 16px; }
-        .page-content { padding: 16px; }
+        body.sidebar-collapsed .sidebar {
+            width: 280px;
+        }
+
+        body.sidebar-collapsed .sidebar-brand-text,
+        body.sidebar-collapsed .link-text {
+            display: inline;
+        }
+
+        body.sidebar-collapsed .sidebar a {
+            justify-content: flex-start;
+        }
+
+        .content-area {
+            margin-left: 0 !important;
+        }
+
+        .topbar {
+            padding: 14px 16px;
+        }
+
+        .page-content {
+            padding: 16px;
+        }
+    }
+
+    /*
+|--------------------------------------------------------------------------
+| SIDEBAR SCROLLBAR
+|--------------------------------------------------------------------------
+*/
+
+    .sidebar::-webkit-scrollbar {
+
+        width: 4px;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+
+        background: rgba(245, 158, 11, 0.4);
+
+        border-radius: 20px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+
+        background: transparent;
     }
 
     @keyframes submenuFade {
-        from { opacity: 0; transform: translateY(-6px); }
-        to   { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
@@ -352,7 +478,7 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                 <i class="bi bi-graph-up-arrow"></i>
                 <span class="link-text">Student Performance</span>
             </a>
-            
+
 
         <?php elseif ($role === 'student'): ?>
             <a href="/college/public/index.php?url=student-performance"
@@ -360,7 +486,7 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                 <i class="bi bi-graph-up-arrow"></i>
                 <span class="link-text">My Performance</span>
             </a>
-           
+
         <?php endif; ?>
 
         <a href="/college/public/index.php?url=logout">
@@ -393,7 +519,9 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                             <i class="bi bi-person-circle me-2"></i> Profile
                         </a>
                     </li>
-                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
                     <li>
                         <a class="dropdown-item text-danger" href="/college/public/index.php?url=logout">
                             <i class="bi bi-box-arrow-right me-2"></i> Logout
@@ -405,12 +533,12 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
 
         <main class="page-content">
 
-        <script>
-        function toggleReportsMenu(e) {
-            e.preventDefault();
-            const btn = e.currentTarget;
-            const submenu = document.getElementById('reportsSubmenu');
-            btn.classList.toggle('active');
-            if (submenu) submenu.classList.toggle('show');
-        }
-        </script>
+            <script>
+                function toggleReportsMenu(e) {
+                    e.preventDefault();
+                    const btn = e.currentTarget;
+                    const submenu = document.getElementById('reportsSubmenu');
+                    btn.classList.toggle('active');
+                    if (submenu) submenu.classList.toggle('show');
+                }
+            </script>

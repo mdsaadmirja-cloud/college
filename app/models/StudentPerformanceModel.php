@@ -322,41 +322,105 @@ class StudentPerformanceModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function getFilteredStudents($academicYear = '', $courseId = '', $semesterId = '', $sectionId = '')
-    {
-        $sql = "
-        SELECT id, candidate_name
+    public function getFilteredStudents(
+        $search = '',
+        $courseId = '',
+        $semesterId = '',
+        $sectionId = ''
+    ) {
+        $query = "
+
+        SELECT *
+
         FROM students
+
         WHERE 1=1
     ";
 
         $params = [];
 
-        if (!empty($academicYear)) {
-            $sql .= " AND academic_year = ? ";
-            $params[] = $academicYear;
-        }
+        /*
+    |--------------------------------------------------------------------------
+    | COURSE FILTER
+    |--------------------------------------------------------------------------
+    */
 
         if (!empty($courseId)) {
-            $sql .= " AND course_id = ? ";
-            $params[] = $courseId;
+
+            $query .= "
+            AND course_id = :course_id
+        ";
+
+            $params['course_id'] =
+                $courseId;
         }
+
+        /*
+    |--------------------------------------------------------------------------
+    | SEMESTER FILTER
+    |--------------------------------------------------------------------------
+    */
 
         if (!empty($semesterId)) {
-            $sql .= " AND semester_id = ? ";
-            $params[] = $semesterId;
+
+            $query .= "
+            AND semester_id = :semester_id
+        ";
+
+            $params['semester_id'] =
+                $semesterId;
         }
+
+        /*
+    |--------------------------------------------------------------------------
+    | SECTION FILTER
+    |--------------------------------------------------------------------------
+    */
 
         if (!empty($sectionId)) {
-            $sql .= " AND section_id = ? ";
-            $params[] = $sectionId;
+
+            $query .= "
+            AND section_id = :section_id
+        ";
+
+            $params['section_id'] =
+                $sectionId;
         }
 
-        $sql .= " ORDER BY candidate_name ASC ";
+        /*
+    |--------------------------------------------------------------------------
+    | SEARCH FILTER
+    |--------------------------------------------------------------------------
+    */
 
-        $stmt = $this->conn->prepare($sql);
+        if (!empty($search)) {
+
+            $query .= "
+            AND candidate_name LIKE :search
+        ";
+
+            $params['search'] =
+                '%' . $search . '%';
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | ORDER
+    |--------------------------------------------------------------------------
+    */
+
+        $query .= "
+        ORDER BY candidate_name ASC
+    ";
+
+
+        $stmt =
+            $this->conn->prepare($query);
+
         $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return
+            $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getFilteredSubjects($courseId = '', $semesterId = '')
@@ -601,5 +665,454 @@ class StudentPerformanceModel
         }
 
         return true;
+    }
+
+    public function getAllStudents()
+    {
+        $query = "
+        SELECT
+            s.id,
+            s.student_id,
+            s.candidate_name,
+            s.department,
+            s.semester,
+            s.section,
+            s.academic_year
+        FROM students s
+        ORDER BY s.candidate_name ASC
+    ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getStudentById($studentId)
+    {
+        $query = "
+        SELECT
+            s.*
+        FROM students s
+        WHERE s.id = :student_id
+        LIMIT 1
+    ";
+
+        $stmt = $this->conn->prepare($query);
+
+        $stmt->bindParam(':student_id', $studentId);
+
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function updateStudentPerformance(
+        $studentId,
+        $firstIa,
+        $secondIa,
+        $midTerm,
+        $attendanceStatus,
+        $remarks
+    ) {
+
+        try {
+
+            $this->conn->beginTransaction();
+
+            /*
+        |--------------------------------------------------------------------------
+        | UPDATE ATTENDANCE
+        |--------------------------------------------------------------------------
+        */
+
+            $attendanceCheckQuery = "
+            SELECT id
+            FROM attendance
+            WHERE student_id = :student_id
+            LIMIT 1
+        ";
+
+            $attendanceCheckStmt = $this->conn->prepare($attendanceCheckQuery);
+
+            $attendanceCheckStmt->bindParam(':student_id', $studentId);
+
+            $attendanceCheckStmt->execute();
+
+            $existingAttendance = $attendanceCheckStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($existingAttendance) {
+
+                $attendanceUpdateQuery = "
+                UPDATE attendance
+                SET status = :status
+                WHERE student_id = :student_id
+            ";
+
+                $attendanceUpdateStmt = $this->conn->prepare($attendanceUpdateQuery);
+
+                $attendanceUpdateStmt->bindParam(':status', $attendanceStatus);
+                $attendanceUpdateStmt->bindParam(':student_id', $studentId);
+
+                $attendanceUpdateStmt->execute();
+            } else {
+
+                $attendanceInsertQuery = "
+                INSERT INTO attendance (
+                    student_id,
+                    status
+                )
+                VALUES (
+                    :student_id,
+                    :status
+                )
+            ";
+
+                $attendanceInsertStmt = $this->conn->prepare($attendanceInsertQuery);
+
+                $attendanceInsertStmt->bindParam(':student_id', $studentId);
+                $attendanceInsertStmt->bindParam(':status', $attendanceStatus);
+
+                $attendanceInsertStmt->execute();
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | SAVE TEACHER NOTE
+        |--------------------------------------------------------------------------
+        */
+
+            if (!empty($remarks)) {
+
+                $facultyId = $_SESSION['user_id'] ?? null;
+
+                $noteQuery = "
+                INSERT INTO student_teacher_notes (
+                    student_id,
+                    faculty_id,
+                    note,
+                    created_at,
+                    updated_at
+                )
+                VALUES (
+                    :student_id,
+                    :faculty_id,
+                    :note,
+                    NOW(),
+                    NOW()
+                )
+            ";
+
+                $noteStmt = $this->conn->prepare($noteQuery);
+
+                $noteStmt->bindParam(':student_id', $studentId);
+                $noteStmt->bindParam(':faculty_id', $facultyId);
+                $noteStmt->bindParam(':note', $remarks);
+
+                $noteStmt->execute();
+            }
+
+            /*
+        |--------------------------------------------------------------------------
+        | UPDATE MARKS
+        |--------------------------------------------------------------------------
+        */
+
+            $marks = [
+                'First IA'  => $firstIa,
+                'Second IA' => $secondIa,
+                'Mid Term'  => $midTerm
+            ];
+
+            foreach ($marks as $examName => $score) {
+
+                /*
+            |--------------------------------------------------------------------------
+            | GET EXAM ID
+            |--------------------------------------------------------------------------
+            */
+
+                $examQuery = "
+                SELECT id
+                FROM exams
+                WHERE exam_name = :exam_name
+                LIMIT 1
+            ";
+
+                $examStmt = $this->conn->prepare($examQuery);
+
+                $examStmt->bindParam(':exam_name', $examName);
+
+                $examStmt->execute();
+
+                $exam = $examStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$exam) {
+                    continue;
+                }
+
+                $examId = $exam['id'];
+
+                /*
+            |--------------------------------------------------------------------------
+            | GET SUBJECT ID
+            |--------------------------------------------------------------------------
+            */
+
+                $subjectQuery = "
+                SELECT id
+                FROM subjects
+                LIMIT 1
+            ";
+
+                $subjectStmt = $this->conn->prepare($subjectQuery);
+
+                $subjectStmt->execute();
+
+                $subject = $subjectStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$subject) {
+                    continue;
+                }
+
+                $subjectId = $subject['id'];
+
+                /*
+            |--------------------------------------------------------------------------
+            | CHECK EXISTING MARKS
+            |--------------------------------------------------------------------------
+            */
+
+                $checkQuery = "
+                SELECT id
+                FROM marks
+                WHERE student_id = :student_id
+                AND subject_id = :subject_id
+                AND exam_id = :exam_id
+                LIMIT 1
+            ";
+
+                $checkStmt = $this->conn->prepare($checkQuery);
+
+                $checkStmt->bindParam(':student_id', $studentId);
+                $checkStmt->bindParam(':subject_id', $subjectId);
+                $checkStmt->bindParam(':exam_id', $examId);
+
+                $checkStmt->execute();
+
+                $existingMark = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+                /*
+            |--------------------------------------------------------------------------
+            | UPDATE EXISTING MARK
+            |--------------------------------------------------------------------------
+            */
+
+                if ($existingMark) {
+
+                    $updateQuery = "
+                    UPDATE marks
+                    SET marks_obtained = :marks_obtained
+                    WHERE id = :id
+                ";
+
+                    $updateStmt = $this->conn->prepare($updateQuery);
+
+                    $updateStmt->bindParam(':marks_obtained', $score);
+                    $updateStmt->bindParam(':id', $existingMark['id']);
+
+                    $updateStmt->execute();
+                } else {
+
+                    /*
+                |--------------------------------------------------------------------------
+                | INSERT NEW MARK
+                |--------------------------------------------------------------------------
+                */
+
+                    $insertQuery = "
+                    INSERT INTO marks (
+                        student_id,
+                        subject_id,
+                        exam_id,
+                        marks_obtained
+                    )
+                    VALUES (
+                        :student_id,
+                        :subject_id,
+                        :exam_id,
+                        :marks_obtained
+                    )
+                ";
+
+                    $insertStmt = $this->conn->prepare($insertQuery);
+
+                    $insertStmt->bindParam(':student_id', $studentId);
+                    $insertStmt->bindParam(':subject_id', $subjectId);
+                    $insertStmt->bindParam(':exam_id', $examId);
+                    $insertStmt->bindParam(':marks_obtained', $score);
+
+                    $insertStmt->execute();
+                }
+            }
+
+            $this->conn->commit();
+
+            return true;
+        } catch (Exception $e) {
+
+            $this->conn->rollBack();
+
+            return false;
+        }
+    }
+
+    public function deleteStudentPerformance($studentId)
+    {
+        try {
+
+            $this->conn->beginTransaction();
+
+            /*
+        |--------------------------------------------------------------------------
+        | DELETE MARKS
+        |--------------------------------------------------------------------------
+        */
+
+            $marksQuery = "
+            DELETE FROM marks
+            WHERE student_id = :student_id
+        ";
+
+            $marksStmt = $this->conn->prepare($marksQuery);
+
+            $marksStmt->bindParam(':student_id', $studentId);
+
+            $marksStmt->execute();
+
+            /*
+        |--------------------------------------------------------------------------
+        | DELETE ATTENDANCE
+        |--------------------------------------------------------------------------
+        */
+
+            $attendanceQuery = "
+            DELETE FROM attendance
+            WHERE student_id = :student_id
+        ";
+
+            $attendanceStmt = $this->conn->prepare($attendanceQuery);
+
+            $attendanceStmt->bindParam(':student_id', $studentId);
+
+            $attendanceStmt->execute();
+
+            /*
+        |--------------------------------------------------------------------------
+        | DELETE TEACHER NOTES
+        |--------------------------------------------------------------------------
+        */
+
+            $notesQuery = "
+            DELETE FROM student_teacher_notes
+            WHERE student_id = :student_id
+        ";
+
+            $notesStmt = $this->conn->prepare($notesQuery);
+
+            $notesStmt->bindParam(':student_id', $studentId);
+
+            $notesStmt->execute();
+
+            $this->conn->commit();
+
+            return true;
+        } catch (Exception $e) {
+
+            $this->conn->rollBack();
+
+            return false;
+        }
+    }
+
+    public function getStudentPerformanceData($studentId)
+    {
+        $data = [];
+
+        /*
+    |--------------------------------------------------------------------------
+    | ATTENDANCE
+    |--------------------------------------------------------------------------
+    */
+
+        $attendanceQuery = "
+    SELECT status
+    FROM attendance
+    WHERE student_id = :student_id
+    ORDER BY id DESC
+    LIMIT 1
+";
+
+        $attendanceStmt = $this->conn->prepare($attendanceQuery);
+
+        $attendanceStmt->bindParam(':student_id', $studentId);
+
+        $attendanceStmt->execute();
+
+        $data['attendance'] = $attendanceStmt->fetch(PDO::FETCH_ASSOC);
+
+        /*
+    |--------------------------------------------------------------------------
+    | MARKS
+    |--------------------------------------------------------------------------
+    */
+
+        $marksQuery = "
+        SELECT
+            e.exam_name,
+            m.marks_obtained
+        FROM marks m
+        JOIN exams e ON e.id = m.exam_id
+        WHERE m.student_id = :student_id
+    ";
+
+        $marksStmt = $this->conn->prepare($marksQuery);
+
+        $marksStmt->bindParam(':student_id', $studentId);
+
+        $marksStmt->execute();
+
+        $marks = $marksStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $data['marks'] = [];
+
+        foreach ($marks as $mark) {
+
+            $data['marks'][$mark['exam_name']] = $mark['marks_obtained'];
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | TEACHER NOTE
+    |--------------------------------------------------------------------------
+    */
+
+        $noteQuery = "
+        SELECT note
+        FROM student_teacher_notes
+        WHERE student_id = :student_id
+        ORDER BY id DESC
+        LIMIT 1
+    ";
+
+        $noteStmt = $this->conn->prepare($noteQuery);
+
+        $noteStmt->bindParam(':student_id', $studentId);
+
+        $noteStmt->execute();
+
+        $data['note'] = $noteStmt->fetch(PDO::FETCH_ASSOC);
+
+        return $data;
     }
 }

@@ -166,7 +166,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .insight-card {
-        background: linear-gradient(135deg, rgba(245,158,11,0.07), rgba(249,115,22,0.04));
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.07), rgba(249, 115, 22, 0.04));
         border-left: 6px solid var(--cms-gold);
     }
 
@@ -237,7 +237,7 @@ $userRole = strtolower($_SESSION['role'] ?? '');
     }
 
     .action-card {
-        background: linear-gradient(135deg, rgba(245,158,11,0.07), #ffffff);
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.07), #ffffff);
     }
 
     .form-label {
@@ -534,6 +534,19 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                             📄 Download PDF
                         </button>
                     <?php endif; ?>
+                    <?php if ($userRole === 'faculty'): ?>
+                        <a href="<?= BASE_URL ?>manage-student-performance"
+                            class="btn btn-warning fw-semibold">
+                            ⚙ Manage Performance
+                        </a>
+                    <?php endif; ?>
+
+                    <a href="<?= BASE_URL ?>manage-attendance"
+                        class="btn btn-warning fw-semibold">
+
+                        📅 Manage Attendance
+
+                    </a>
 
                     <a href="<?= BASE_URL ?>dashboard" class="btn btn-outline-light fw-semibold">
                         ← Back
@@ -853,84 +866,138 @@ $userRole = strtolower($_SESSION['role'] ?? '');
 
             <?php
             $avgMarks = $overview['avg_marks'] ?? 0;
-            $attendancePercentage = $attendance['attendance_percentage'] ?? 0;
-            $totalDays = $attendance['total_days'] ?? 0;
-            $presentDays = $attendance['present_days'] ?? 0;
-            $absentDays = $totalDays - $presentDays;
+
+            $attendancePercentage =
+                $attendance['attendance_percentage'] ?? 0;
+
+            $totalDays =
+                $attendance['total_days'] ?? 0;
+
+            $presentDays =
+                $attendance['present_days'] ?? 0;
+
+            $absentDays =
+                $totalDays - $presentDays;
+
             $requiredAttendance = 75;
-            $shortage = max(0, $requiredAttendance - $attendancePercentage);
+
+            $shortage =
+                max(0, $requiredAttendance - $attendancePercentage);
 
             $failedSubjects = 0;
+
             $weakSubjectCount = count($weakSubjects);
 
             if (!empty($subjectPerformance)) {
+
                 foreach ($subjectPerformance as $subPerf) {
+
                     if (($subPerf['percentage'] ?? 0) < 35) {
                         $failedSubjects++;
                     }
                 }
             }
 
-            if ($failedSubjects > 0) {
-                $status = "Critical";
-                $statusClass = "danger";
-                $riskLevel = "Critical Risk";
-                $riskKpiClass = "kpi-red";
-            } elseif ($avgMarks >= 75 && $attendancePercentage >= 75) {
+            /*
+    |--------------------------------------------------------------------------
+    | AI INSIGHT ENGINE
+    |--------------------------------------------------------------------------
+    */
+
+            require_once __DIR__ . '/../../services/AcademicInsightEngine.php';
+
+            $aiInsights =
+                AcademicInsightEngine::analyze(
+                    $attendancePercentage,
+                    $avgMarks,
+                    $subjectPerformance
+                );
+
+            $reasonTags =
+                $aiInsights['tags'];
+
+            $recommendedAction =
+                implode(", ", $aiInsights['recommendations']);
+
+            $insightComment =
+                $aiInsights['summary'];
+
+            $riskLevel =
+                $aiInsights['risk'];
+
+            /*
+    |--------------------------------------------------------------------------
+    | DYNAMIC STATUS UI
+    |--------------------------------------------------------------------------
+    */
+
+            if ($riskLevel === "Low") {
+
                 $status = "Excellent";
                 $statusClass = "success";
-                $riskLevel = "Low Risk";
                 $riskKpiClass = "kpi-green";
-            } elseif ($avgMarks >= 50 && $attendancePercentage >= 60) {
+            } elseif ($riskLevel === "Medium") {
+
                 $status = "Average";
                 $statusClass = "warning";
-                $riskLevel = "Medium Risk";
                 $riskKpiClass = "kpi-amber";
-            } else {
+            } elseif ($riskLevel === "High") {
+
                 $status = "Needs Improvement";
                 $statusClass = "danger";
-                $riskLevel = "High Risk";
+                $riskKpiClass = "kpi-red";
+            } else {
+
+                $status = "Critical";
+                $statusClass = "danger";
                 $riskKpiClass = "kpi-red";
             }
 
-            $reasonTags = [];
-            $insightComment = "";
-            $recommendedAction = "";
+            /*
+    |--------------------------------------------------------------------------
+    | STUDENT DETAILS
+    |--------------------------------------------------------------------------
+    */
 
-            if ($failedSubjects > 0) {
-                $reasonTags = ["Failed Subject", "Weak Concepts", "Needs Revision", "Parent Follow-up"];
-                $insightComment = "The student has failed in one or more subjects. This may be due to irregular attendance, incomplete preparation, weak understanding of basic concepts, and lack of consistent academic effort.";
-                $recommendedAction = "Immediate remedial classes, weekly progress monitoring, and parent follow-up are recommended.";
-            } elseif ($avgMarks >= 75 && $attendancePercentage >= 75) {
-                $reasonTags = ["Regular Attendance", "Attentive in Class", "Good IA Score", "Consistent Preparation"];
-                $insightComment = "The student is performing well due to regular attendance, classroom attentiveness, consistent preparation, and good performance in internal assessments.";
-                $recommendedAction = "Continue the same consistency and encourage advanced learning activities.";
-            } elseif ($avgMarks >= 50) {
-                $reasonTags = ["Average Performance", "Needs Revision", "Improve Answer Writing", "Practice Required"];
-                $insightComment = "The student has average academic performance. The result indicates basic subject understanding, but more revision, answer-writing practice, and consistent preparation are required.";
-                $recommendedAction = "Focus on weak subjects, revise important topics, and practice previous question papers.";
-            } else {
-                $reasonTags = ["Low Marks", "Weak Subjects", "Poor Preparation", "Needs Parent Follow-up"];
-                $insightComment = "The student's performance is weak mainly due to lack of consistent preparation, weak subject understanding, insufficient revision, and possible irregular academic involvement.";
-                $recommendedAction = "Parent meeting, remedial classes, and regular assignment completion should be prioritized.";
-            }
+            $studentName =
+                $studentProfile['candidate_name']
+                ?? $overview['candidate_name']
+                ?? 'Student';
 
-            $studentName = $studentProfile['candidate_name'] ?? $overview['candidate_name'] ?? 'Student';
-            $parentPhone = $studentProfile['parent_phone'] ?? $studentProfile['phone'] ?? '';
+            $parentPhone =
+                $studentProfile['parent_phone']
+                ?? $studentProfile['phone']
+                ?? '';
 
-            $whatsappMessage = "Dear Parent, Performance report of " . $studentName .
-                ": Overall " . $avgMarks . "%, Attendance " . $attendancePercentage .
-                "%. Status: " . $status . ". Recommended Action: " . $recommendedAction;
+            /*
+    |--------------------------------------------------------------------------
+    | WHATSAPP MESSAGE
+    |--------------------------------------------------------------------------
+    */
+
+            $whatsappMessage =
+                "Dear Parent, Performance report of "
+                . $studentName .
+                ": Overall " . $avgMarks .
+                "%, Attendance " . $attendancePercentage .
+                "%. Status: " . $status .
+                ". Recommended Action: "
+                . $recommendedAction;
 
             $whatsappUrl = "";
+
             if (!empty($parentPhone)) {
-                $cleanPhone = preg_replace('/[^0-9]/', '', $parentPhone);
+
+                $cleanPhone =
+                    preg_replace('/[^0-9]/', '', $parentPhone);
 
                 if (strlen($cleanPhone) == 10) {
                     $cleanPhone = "91" . $cleanPhone;
                 }
 
-                $whatsappUrl = "https://wa.me/" . $cleanPhone . "?text=" . urlencode($whatsappMessage);
+                $whatsappUrl =
+                    "https://wa.me/" . $cleanPhone .
+                    "?text=" . urlencode($whatsappMessage);
             }
             ?>
 
@@ -1117,76 +1184,458 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                         </div>
                     <?php endif; ?>
 
-                    <form method="POST" action="<?= BASE_URL ?>save-student-attendance">
-                        <input type="hidden" name="student_id" value="<?= htmlspecialchars($studentId) ?>">
-                        <input type="hidden" name="redirect_url" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+                    <form method="POST"
+                        action="<?= BASE_URL ?>save-daily-attendance">
+                        <div class="row g-3 mb-4">
 
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-3">
-                                <label class="form-label small text-muted">Present Days</label>
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Attendance Date
+                                </label>
+
                                 <input
-                                    type="number"
-                                    name="present_days"
+                                    type="date"
+                                    name="attendance_date"
                                     class="form-control"
-                                    min="0"
-                                    value="<?= htmlspecialchars($presentDays ?? 0) ?>"
                                     required>
+
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label small text-muted">Absent Days</label>
-                                <input
-                                    type="number"
-                                    name="absent_days"
-                                    class="form-control"
-                                    min="0"
-                                    value="<?= htmlspecialchars($absentDays ?? 0) ?>"
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Subject
+                                </label>
+
+                                <select
+                                    name="subject_id"
+                                    class="form-select"
                                     required>
+
+                                    <option value="">
+                                        Select Subject
+                                    </option>
+
+                                    <?php foreach ($subjects as $sub): ?>
+
+                                        <option
+                                            value="<?= $sub['id'] ?>">
+
+                                            <?= htmlspecialchars(
+                                                $sub['subject_name']
+                                            ) ?>
+
+                                        </option>
+
+                                    <?php endforeach; ?>
+
+                                </select>
+
                             </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label small text-muted">Total Days</label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    value="<?= htmlspecialchars(($presentDays ?? 0) + ($absentDays ?? 0)) ?>"
-                                    readonly>
-                            </div>
-
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    💾 Save Attendance
-                                </button>
-                            </div>
                         </div>
+
+                        <div class="table-responsive">
+
+                            <table class="table table-hover matrix-table align-middle">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th>Student</th>
+
+                                        <th>Status</th>
+
+                                    </tr>
+
+                                </thead>
+
+                                <tbody>
+
+                                    <?php foreach ($students as $student): ?>
+
+                                        <tr>
+
+                                            <td class="fw-semibold">
+
+                                                <?= htmlspecialchars(
+                                                    $student['candidate_name']
+                                                ) ?>
+
+                                            </td>
+
+                                            <td>
+
+                                                <select
+                                                    name="attendance[<?= $student['id'] ?>]"
+                                                    class="form-select">
+
+                                                    <option value="Present">
+
+                                                        ✅ Present
+
+                                                    </option>
+
+                                                    <option value="Absent">
+
+                                                        ❌ Absent
+
+                                                    </option>
+
+                                                </select>
+
+                                            </td>
+
+                                        </tr>
+
+                                    <?php endforeach; ?>
+
+                                </tbody>
+
+                            </table>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary">
+
+                            💾 Save Daily Attendance
+
+                        </button>
+
                     </form>
                 </div>
 
             <?php endif; ?>
+            <div class="mt-3">
+
+                <button
+                    class="btn btn-outline-primary"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#comparisonPanel">
+                    Comparison
+                </button>
+
+            </div>
+
+            <div class="collapse mt-3" id="comparisonPanel">
+
+                <div class="cms-card p-3">
+
+                    <form method="GET">
+
+                        <?php foreach ($_GET as $key => $value): ?>
+
+                            <?php if ($key !== 'comparison_type'): ?>
+
+                                <input
+                                    type="hidden"
+                                    name="<?= htmlspecialchars($key) ?>"
+                                    value="<?= htmlspecialchars($value) ?>">
+
+                            <?php endif; ?>
+
+                        <?php endforeach; ?>
+
+                        <div class="row g-3 align-items-end">
+
+                            <!-- LEFT SIDE -->
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    Compare
+                                </label>
+
+                                <select
+                                    name="compare_from"
+                                    class="form-select">
+
+                                    <option value="first_ia">
+                                        First IA
+                                    </option>
+
+                                    <option value="second_ia">
+                                        Second IA
+                                    </option>
+
+                                    <option value="mid_term">
+                                        Mid Term
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <!-- RIGHT SIDE -->
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    With
+                                </label>
+
+                                <select
+                                    name="compare_to"
+                                    class="form-select">
+
+                                    <option value="second_ia">
+                                        Second IA
+                                    </option>
+
+                                    <option value="mid_term">
+                                        Mid Term
+                                    </option>
+
+                                    <option value="first_ia">
+                                        First IA
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+                            <!-- BUTTON -->
+
+                            <div class="col-md-2">
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary w-100">
+                                    Compare
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+            <?php
+
+            /*
+|--------------------------------------------------------------------------
+| COMPARISON SELECTION
+|--------------------------------------------------------------------------
+*/
+
+            $compareFrom =
+                $_GET['compare_from']
+                ?? 'first_ia';
+
+            $compareTo =
+                $_GET['compare_to']
+                ?? 'second_ia';
+
+            /*
+|--------------------------------------------------------------------------
+| FIELD LABELS
+|--------------------------------------------------------------------------
+*/
+
+            $fieldLabels = [
+
+                'first_ia' => 'First IA',
+
+                'second_ia' => 'Second IA',
+
+                'mid_term' => 'Mid Term'
+            ];
+
+            /*
+|--------------------------------------------------------------------------
+| CHART LABELS
+|--------------------------------------------------------------------------
+*/
+
+            $chartLabels = [
+
+                $fieldLabels[$compareFrom],
+
+                $fieldLabels[$compareTo]
+            ];
+
+            /*
+|--------------------------------------------------------------------------
+| CALCULATE AVERAGES
+|--------------------------------------------------------------------------
+*/
+
+            $fromAverage = 0;
+
+            $toAverage = 0;
+
+            $count =
+                count($subjectPerformance);
+
+            if ($count > 0) {
+
+                foreach ($subjectPerformance as $subject) {
+
+                    $fromAverage +=
+                        $subject[$compareFrom] ?? 0;
+
+                    $toAverage +=
+                        $subject[$compareTo] ?? 0;
+                }
+
+                $fromAverage /= $count;
+
+                $toAverage /= $count;
+            }
+
+            /*
+|--------------------------------------------------------------------------
+| FINAL CHART DATA
+|--------------------------------------------------------------------------
+*/
+
+            $chartData = [
+
+                round($fromAverage, 2),
+
+                round($toAverage, 2)
+            ];
+
+            /*
+|--------------------------------------------------------------------------
+| COMPARISON INSIGHT
+|--------------------------------------------------------------------------
+*/
+
+            $comparisonInsight = "";
+
+            if ($compareFrom === 'first_ia' && $compareTo === 'second_ia') {
+
+                if ($toAverage > $fromAverage) {
+
+                    $comparisonInsight =
+                        "Student shows improvement between IA 1 and IA 2.";
+                } elseif ($toAverage < $fromAverage) {
+
+                    $comparisonInsight =
+                        "Student performance declined in IA 2.";
+                } else {
+
+                    $comparisonInsight =
+                        "Student performance remained consistent across internal assessments.";
+                }
+            }
+
+            /*
+|--------------------------------------------------------------------------
+| IA VS MID TERM
+|--------------------------------------------------------------------------
+*/ elseif (
+                ($compareFrom === 'first_ia' || $compareFrom === 'second_ia')
+                &&
+                $compareTo === 'mid_term'
+            ) {
+
+                if ($toAverage > $fromAverage) {
+
+                    $comparisonInsight =
+                        "Student performs better in full syllabus examinations.";
+                } elseif ($toAverage < $fromAverage) {
+
+                    $comparisonInsight =
+                        "Student struggles in long-duration or major exams.";
+                } else {
+
+                    $comparisonInsight =
+                        "Student maintains similar performance across assessments.";
+                }
+            }
+
+            /*
+|--------------------------------------------------------------------------
+| MID TERM VS IA
+|--------------------------------------------------------------------------
+*/ elseif (
+                $compareFrom === 'mid_term'
+                &&
+                ($compareTo === 'first_ia' || $compareTo === 'second_ia')
+            ) {
+
+                if ($fromAverage > $toAverage) {
+
+                    $comparisonInsight =
+                        "Student demonstrates strong final exam capability.";
+                } elseif ($fromAverage < $toAverage) {
+
+                    $comparisonInsight =
+                        "Internal assessment performance is stronger than exam performance.";
+                } else {
+
+                    $comparisonInsight =
+                        "Performance consistency observed across evaluation types.";
+                }
+            }
+
+            ?>
 
             <div class="row g-4 mb-4">
                 <div class="col-lg-8">
                     <div class="cms-card p-4 h-100">
                         <h5 class="section-title">
-                            Performance Trend
+
+                            <?= $fieldLabels[$compareFrom] ?>
+
+                            vs
+
+                            <?= $fieldLabels[$compareTo] ?>
+
+                            Comparison
+
                             <?php if (!empty($selectedSubjectId) && !empty($subjects)): ?>
+
                                 <?php
                                 $selectedSubjectName = '';
+
                                 foreach ($subjects as $sub) {
+
                                     if ($sub['id'] == $selectedSubjectId) {
-                                        $selectedSubjectName = $sub['subject_name'];
+
+                                        $selectedSubjectName =
+                                            $sub['subject_name'];
+
                                         break;
                                     }
                                 }
                                 ?>
-                                <small class="text-muted">- <?= htmlspecialchars($selectedSubjectName) ?></small>
+
+                                <small class="text-muted">
+                                    - <?= htmlspecialchars($selectedSubjectName) ?>
+                                </small>
+
                             <?php else: ?>
-                                <small class="text-muted">- All Subjects</small>
+
+                                <small class="text-muted">
+                                    - All Subjects
+                                </small>
+
                             <?php endif; ?>
+
                         </h5>
 
                         <?php if (!empty($trend)): ?>
                             <canvas id="trendChart" height="120"></canvas>
+
+                            <div class="alert alert-info mt-3 mb-0">
+
+                                <strong>AI Comparison Insight:</strong>
+
+                                <?= $comparisonInsight ?>
+
+                            </div>
                         <?php else: ?>
                             <p class="text-muted text-center py-5 mb-0">
                                 No chart data found.
@@ -1511,19 +1960,269 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                     <div class="row g-3">
                         <?php foreach ($weakSubjects as $subject): ?>
                             <?php
-                            $percentage = $subject['percentage'] ?? 0;
+                            $attendanceIssue =
+                                $attendancePercentage < 60;
+
+                            $midTerm =
+                                $subject['mid_term'] ?? 0;
+
+                            $firstIa =
+                                $subject['first_ia'] ?? 0;
+
+                            $secondIa =
+                                $subject['second_ia'] ?? 0;
+
+                            /*
+|--------------------------------------------------------------------------
+| PRIORITY
+|--------------------------------------------------------------------------
+*/
 
                             if ($percentage < 35) {
-                                $issue = "Very low performance";
-                                $suggestion = "Attend remedial classes and revise basic concepts.";
-                                $target = "Improve to 50%+";
+
+                                $priority = "Critical";
                                 $tagClass = "badge-soft-red";
-                            } else {
-                                $issue = "Needs more practice";
-                                $suggestion = "Practice previous question papers and important questions.";
-                                $target = "Improve to 60%+";
+                            } elseif ($percentage < 50) {
+
+                                $priority = "High";
                                 $tagClass = "badge-soft-amber";
+                            } elseif ($percentage < 70) {
+
+                                $priority = "Moderate";
+                                $tagClass = "badge-soft-blue";
+                            } else {
+
+                                $priority = "Stable";
+                                $tagClass = "badge-soft-green";
                             }
+
+                            /*
+|--------------------------------------------------------------------------
+| DYNAMIC SUBJECT ANALYSIS
+|--------------------------------------------------------------------------
+*/
+
+                            $rootCause = [];
+                            $recommendation = [];
+                            $weeklyPlan = [];
+
+                            /*
+|--------------------------------------------------------------------------
+| IA AVERAGE
+|--------------------------------------------------------------------------
+*/
+
+                            $iaAverage =
+                                ($firstIa + $secondIa) / 2;
+
+                            /*
+|--------------------------------------------------------------------------
+| PERFORMANCE GAP
+|--------------------------------------------------------------------------
+*/
+
+                            $gap =
+                                $midTerm - $iaAverage;
+
+                            /*
+|--------------------------------------------------------------------------
+| VERY LOW PERFORMANCE
+|--------------------------------------------------------------------------
+*/
+
+                            if ($percentage < 35) {
+
+                                $rootCause[] =
+                                    "Weak conceptual understanding detected";
+
+                                $recommendation[] =
+                                    "Focus on core concepts and fundamentals.";
+
+                                $weeklyPlan[] =
+                                    "Revise weak topics daily.";
+
+                                $weeklyPlan[] =
+                                    "Attend additional practice sessions.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| AVERAGE PERFORMANCE
+|--------------------------------------------------------------------------
+*/ elseif ($percentage >= 35 && $percentage < 60) {
+
+                                $rootCause[] =
+                                    "Needs stronger problem-solving consistency";
+
+                                $recommendation[] =
+                                    "Practice application-based questions regularly.";
+
+                                $weeklyPlan[] =
+                                    "Solve previous assessment questions weekly.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| GOOD PERFORMANCE
+|--------------------------------------------------------------------------
+*/ elseif ($percentage >= 60 && $percentage < 80) {
+
+                                $rootCause[] =
+                                    "Capable student with improvement potential";
+
+                                $recommendation[] =
+                                    "Focus on advanced-level preparation.";
+
+                                $weeklyPlan[] =
+                                    "Attempt timed mock assessments.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| EXCELLENT PERFORMANCE
+|--------------------------------------------------------------------------
+*/ else {
+
+                                $rootCause[] =
+                                    "Strong and consistent academic performance";
+
+                                $recommendation[] =
+                                    "Maintain current preparation strategy.";
+
+                                $weeklyPlan[] =
+                                    "Focus on advanced problem-solving practice.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| IMPROVEMENT TREND
+|--------------------------------------------------------------------------
+*/
+
+                            if ($secondIa > $firstIa) {
+
+                                $rootCause[] =
+                                    "Positive improvement trend observed";
+
+                                $recommendation[] =
+                                    "Maintain revision consistency.";
+
+                                $weeklyPlan[] =
+                                    "Continue weekly self-assessment.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| DECLINING TREND
+|--------------------------------------------------------------------------
+*/
+
+                            if ($secondIa < $firstIa) {
+
+                                $rootCause[] =
+                                    "Recent performance decline detected";
+
+                                $recommendation[] =
+                                    "Analyze mistakes from previous assessments.";
+
+                                $weeklyPlan[] =
+                                    "Review incorrect answers every weekend.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| MID TERM DROP
+|--------------------------------------------------------------------------
+*/
+
+                            if ($gap < -10) {
+
+                                $rootCause[] =
+                                    "Difficulty handling long-duration exams";
+
+                                $recommendation[] =
+                                    "Practice full-length mock tests.";
+
+                                $weeklyPlan[] =
+                                    "Solve one model paper weekly.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| MID TERM IMPROVEMENT
+|--------------------------------------------------------------------------
+*/
+
+                            if ($gap > 10) {
+
+                                $rootCause[] =
+                                    "Better performance under final exam conditions";
+
+                                $recommendation[] =
+                                    "Start preparation earlier for internal assessments.";
+
+                                $weeklyPlan[] =
+                                    "Maintain balanced semester preparation.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| LOW ATTENDANCE
+|--------------------------------------------------------------------------
+*/
+
+                            if ($attendancePercentage < 50) {
+
+                                $rootCause[] =
+                                    "Low attendance affecting subject understanding";
+
+                                $recommendation[] =
+                                    "Improve classroom participation and attendance.";
+
+                                $weeklyPlan[] =
+                                    "Attend all upcoming classes regularly.";
+                            }
+
+                            /*
+|--------------------------------------------------------------------------
+| TARGET SCORE
+|--------------------------------------------------------------------------
+*/
+
+                            $target =
+                                min(100, round($percentage + 12));
+
+                            /*
+|--------------------------------------------------------------------------
+| INTERVENTION LEVEL
+|--------------------------------------------------------------------------
+*/
+
+                            if ($percentage < 35 || $attendancePercentage < 40) {
+
+                                $intervention =
+                                    "Critical Faculty Mentoring Required";
+                            } elseif ($percentage < 50) {
+
+                                $intervention =
+                                    "Faculty Follow-up Required";
+                            } elseif ($percentage < 70) {
+
+                                $intervention =
+                                    "Regular Progress Monitoring";
+                            } else {
+
+                                $intervention =
+                                    "Self-Driven Improvement";
+                            }
+                            $priority === 'Medium' ? 'Monitor Closely' : 'Standard Support';
+
+                            /*
+|--------------------------------------------------------------------------
+| DISPLAY SUBJECT-WISE PERFORMANCE
+|--------------------------------------------------------------------------
+*/
+
                             ?>
 
                             <div class="col-md-4">
@@ -1536,16 +2235,49 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                                         <?= htmlspecialchars($percentage) ?>%
                                     </span>
 
-                                    <p class="mb-1 mt-2">
-                                        <strong>Issue:</strong> <?= $issue ?>
+                                    <p class="mb-1 mt-3">
+                                        <strong>Priority:</strong>
+                                        <?= $priority ?>
                                     </p>
 
                                     <p class="mb-1">
-                                        <strong>Suggestion:</strong> <?= $suggestion ?>
+                                        <strong>Root Cause:</strong><br>
+
+                                        <?php foreach ($rootCause as $cause): ?>
+
+                                            • <?= htmlspecialchars($cause) ?><br>
+
+                                        <?php endforeach; ?>
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>AI Recommendation:</strong><br>
+
+                                        <?php foreach ($recommendation as $rec): ?>
+
+                                            • <?= htmlspecialchars($rec) ?><br>
+
+                                        <?php endforeach; ?>
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Weekly Plan:</strong><br>
+
+                                        <?php foreach ($weeklyPlan as $week): ?>
+
+                                            • <?= htmlspecialchars($week) ?><br>
+
+                                        <?php endforeach; ?>
+                                    </p>
+
+                                    <p class="mb-1">
+                                        <strong>Target Score:</strong>
+                                        <?= $target ?>%
                                     </p>
 
                                     <p class="mb-0">
-                                        <strong>Target:</strong> <?= $target ?>
+                                        <strong>Intervention:</strong>
+                                        <?= htmlspecialchars($intervention) ?>
                                     </p>
                                 </div>
                             </div>
@@ -1600,8 +2332,11 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                 const chartElement = document.getElementById('trendChart');
 
                 if (chartElement) {
-                    const labels = <?= json_encode(array_column($trend, 'exam_name')) ?>;
-                    const data = <?= json_encode(array_column($trend, 'avg_marks')) ?>;
+                    const labels =
+                        <?= json_encode($chartLabels) ?>;
+
+                    const data =
+                        <?= json_encode($chartData) ?>;
                     const attendance = <?= json_encode($attendancePercentage ?? 0) ?>;
 
                     function getReason(index) {
@@ -1675,9 +2410,17 @@ $userRole = strtolower($_SESSION['role'] ?? '');
                     // 🔥 INSIGHT BOX UPDATE
                     const insightBox = document.getElementById('trendInsight');
 
-                    if (insightBox) {
+                    if (insightBox && data.length > 0) {
+
                         let lastIndex = data.length - 1;
-                        insightBox.innerText = getReason(lastIndex);
+
+                        insightBox.innerText =
+                            <?= json_encode($insightComment) ?>
+
+                    } else if (insightBox) {
+
+                        insightBox.innerText =
+                            "No trend insight available.";
                     }
                 }
             </script>
@@ -1771,6 +2514,27 @@ $userRole = strtolower($_SESSION['role'] ?? '');
         const improvementRows = `
         <?php if (!empty($weakSubjects)): ?>
             <?php foreach ($weakSubjects as $subject): ?>
+                <?php
+
+                /*
+|--------------------------------------------------------------------------
+| SUBJECT VALUES
+|--------------------------------------------------------------------------
+*/
+
+                $percentage =
+                    $subject['percentage'] ?? 0;
+
+                $firstIa =
+                    $subject['first_ia'] ?? 0;
+
+                $secondIa =
+                    $subject['second_ia'] ?? 0;
+
+                $midTerm =
+                    $subject['mid_term'] ?? 0;
+
+                ?>
                 <?php
                 $weakPercentage = $subject['percentage'] ?? 0;
 

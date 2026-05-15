@@ -398,4 +398,9 @@ class UserModel
             return false;
         }
     }
+
+    public function getConnection()
+    {
+        return $this->conn;
+    }
 }

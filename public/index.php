@@ -127,6 +127,38 @@ switch ($url) {
         $performanceController->dashboard();
         break;
 
+    case 'manage-student-performance':
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role = strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->managePerformance();
+        break;
+
+    case 'edit-student-performance':
+
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role = strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->editPerformance();
+
+        break;
+
     case 'create-user':
         if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'admin') {
             redirectTo('login');
@@ -218,19 +250,95 @@ switch ($url) {
         $performanceController->saveMarks();
         break;
     case 'save-student-attendance':
-    if (!isset($_SESSION['user_id'])) {
-        redirectTo('login');
-    }
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
 
-    $role = strtolower($_SESSION['role'] ?? '');
+        $role = strtolower($_SESSION['role'] ?? '');
 
-    if ($role !== 'faculty') {
-        redirectTo('dashboard');
-    }
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
 
-    $performanceController = new StudentPerformanceController($db);
-    $performanceController->saveAttendance();
-    break;
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->saveAttendance();
+        break;
+
+    case 'manage-attendance':
+
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role =
+            strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $controller =
+            new StudentPerformanceController($db);
+
+        $controller->manageAttendance();
+
+
+        break;
+
+    case 'save-subject-attendance':
+
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role =
+            strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $controller =
+            new StudentPerformanceController($db);
+
+        $controller->saveSubjectAttendance();
+
+        break;
+
+
+    case 'update-student-performance':
+
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role = strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->updatePerformance();
+
+        break;
+
+    case 'delete-student-performance':
+
+        if (!isset($_SESSION['user_id'])) {
+            redirectTo('login');
+        }
+
+        $role = strtolower($_SESSION['role'] ?? '');
+
+        if ($role !== 'faculty') {
+            redirectTo('dashboard');
+        }
+
+        $performanceController = new StudentPerformanceController($db);
+        $performanceController->deletePerformance();
+
+        break;
 
     default:
         http_response_code(404);

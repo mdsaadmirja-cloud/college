@@ -42,7 +42,6 @@ class AdminController
         $redirect   = trim($_POST['redirect_to'] ?? 'dashboard');
 
         // First Name
-        // First Name
         if (!empty($firstName) && !preg_match("/^[A-Za-z ]+$/", $firstName)) {
             header('Location: ' . BASE_URL . $redirect . '&msg=invalid_input');
             exit();
@@ -72,7 +71,7 @@ class AdminController
             exit();
         }
 
-        // Department validation (only if custom field exists)
+        // Department validation
         if (
             !empty($_POST['department_custom']) &&
             !preg_match("/^[A-Za-z ]+$/", $_POST['department_custom'])
@@ -98,6 +97,86 @@ class AdminController
 
         $roleName = $this->userModel->getRoleNameById($roleId);
 
+        /*
+    |--------------------------------------------------------------------------
+    | AUTO CREATE STUDENT RECORD
+    |--------------------------------------------------------------------------
+    */
+
+        if (strtolower($roleName) === 'student') {
+
+            $studentQuery = "
+INSERT INTO students (
+    candidate_name,
+    course_id,
+    semester_id,
+    section_id,
+    student_id,
+    department,
+    semester,
+    section,
+    academic_year,
+    parent_phone
+)
+VALUES (
+    :candidate_name,
+    :course_id,
+    :semester_id,
+    :section_id,
+    :student_id,
+    :department,
+    :semester,
+    :section,
+    :academic_year,
+    :parent_phone
+)
+";
+
+            $studentStmt = $this->userModel->getConnection()->prepare($studentQuery);
+
+            $generatedStudentId = 'STU' . rand(1000, 9999);
+
+            $this->userModel->getConnection()->prepare("
+                UPDATE users 
+                SET student_id = :student_id 
+                WHERE email = :email
+            ")->execute([
+                ':student_id' => $generatedStudentId,
+                ':email' => $email
+            ]);
+
+            $fullName = trim($firstName . ' ' . $lastName);
+
+            $defaultDepartment = !empty($department) ? $department : 'BCA';
+
+            $courseId = 1;
+            $semesterId = 1;
+            $sectionId = 1;
+
+            $semester = $_POST['semester'] ?? '1';
+            $section = $_POST['section'] ?? 'A';
+            $academicYear = $_POST['academic_year'] ?? date('Y');
+
+            $studentStmt->bindParam(':candidate_name', $fullName);
+            $studentStmt->bindParam(':course_id', $courseId);
+            $studentStmt->bindParam(':semester_id', $semesterId);
+            $studentStmt->bindParam(':section_id', $sectionId);
+            $studentStmt->bindParam(':student_id', $generatedStudentId);
+            $studentStmt->bindParam(':department', $defaultDepartment);
+            $studentStmt->bindParam(':semester', $semester);
+            $studentStmt->bindParam(':section', $section);
+            $studentStmt->bindParam(':academic_year', $academicYear);
+            $studentStmt->bindParam(':parent_phone', $phone);
+
+
+            if (!$studentStmt->execute()) {
+
+                echo "<pre>";
+                print_r($studentStmt->errorInfo());
+                exit();
+            }
+        }
+
         $mailResult = $this->mailService->sendCredentialsEmail(
             $email,
             $firstName,
@@ -112,6 +191,7 @@ class AdminController
             $error = urlencode($mailResult['error'] ?? 'Unknown mail error');
             header('Location: ' . BASE_URL . $redirect . '&msg=created_but_email_failed&mail_error=' . $error);
         }
+
         exit();
     }
 
