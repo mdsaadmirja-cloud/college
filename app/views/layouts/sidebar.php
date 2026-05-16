@@ -469,6 +469,12 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                     </a>
                 </div>
             </div>
+            <a href="<?= BASE_URL ?>admin-leaderboard"
+                class="btn btn-dark">
+
+                🏆 Global Leaderboard
+
+            </a>
 
             <a href="#"><i class="bi bi-gear-fill"></i><span class="link-text">Settings</span></a>
 
@@ -487,12 +493,39 @@ $role = strtolower($_SESSION['role'] ?? 'admin');
                 <span class="link-text">My Performance</span>
             </a>
 
-        <?php endif; ?>
+            <<li class="sidebar-item">
 
-        <a href="/college/public/index.php?url=logout">
-            <i class="bi bi-box-arrow-right"></i>
-            <span class="link-text">Logout</span>
-        </a>
+                <a href="<?= BASE_URL ?>student-leaderboard"
+
+                    class="sidebar-link
+        <?= (
+                ($_GET['url'] ?? '')
+                === 'student-leaderboard'
+            )
+                ? 'active'
+                : ''
+        ?>">
+
+                    <i class="fas fa-crown"></i>
+
+                    <span class="link-text">
+                        
+                        ♕ Leaderboard ♕
+
+                    </span>
+
+                </a>
+
+                </li>
+
+            <?php endif; ?>
+
+
+
+            <a href="/college/public/index.php?url=logout">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="link-text">Logout</span>
+            </a>
     </aside>
 
     <div class="content-area">

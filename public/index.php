@@ -299,6 +299,24 @@ switch ($url) {
 
         break;
 
+    case 'student-leaderboard':
+
+        $controller =
+            new StudentPerformanceController($db);
+
+        $controller->studentLeaderboard();
+
+        break;
+
+    case 'admin-leaderboard':
+
+        $controller =
+            new StudentPerformanceController($db);
+
+        $controller->adminLeaderboard();
+
+        break;
+
     default:
         http_response_code(404);
         echo '404 Page Not Found';

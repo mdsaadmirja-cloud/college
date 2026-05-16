@@ -1605,4 +1605,221 @@ class StudentPerformanceModel
 
         return $data;
     }
+
+    public function getOverallToppers($limit = 3)
+    {
+        $sql = "
+
+        SELECT
+
+            s.candidate_name,
+
+            c.course_name,
+
+            ROUND(
+
+                (
+                    SUM(m.marks_obtained)
+                    /
+                    NULLIF(
+                        SUM(e.total_marks),
+                        0
+                    )
+                ) * 100,
+
+                2
+
+            ) AS percentage
+
+        FROM students s
+
+        LEFT JOIN marks m
+            ON s.id = m.student_id
+
+        LEFT JOIN exams e
+            ON e.id = m.exam_id
+
+        LEFT JOIN courses c
+            ON c.id = s.course_id
+
+        GROUP BY s.id
+
+        ORDER BY percentage DESC
+
+        LIMIT " . (int)$limit;
+
+        $stmt =
+            $this->conn->prepare($sql);
+
+        $stmt->execute();
+
+        return
+            $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getSemesterToppers(
+        $semesterId,
+        $limit = 5
+    ) {
+        $sql = "
+
+        SELECT
+
+            s.candidate_name,
+
+            ROUND(
+
+                (
+                    SUM(m.marks_obtained)
+                    /
+                    NULLIF(
+                        SUM(e.total_marks),
+                        0
+                    )
+                ) * 100,
+
+                2
+
+            ) AS percentage
+
+        FROM students s
+
+        LEFT JOIN marks m
+            ON s.id = m.student_id
+
+        LEFT JOIN exams e
+            ON e.id = m.exam_id
+
+        WHERE s.semester_id = ?
+
+        GROUP BY s.id
+
+        ORDER BY percentage DESC
+
+        LIMIT " . (int)$limit;
+
+        $stmt =
+            $this->conn->prepare($sql);
+
+        $stmt->execute([$semesterId]);
+
+        return
+            $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    public function getTopPerformers(
+        $courseId = '',
+        $semesterId = '',
+        $limit = 10
+    ) {
+        $sql = "
+
+        SELECT
+
+            s.id,
+
+            s.candidate_name,
+
+            s.student_id,
+
+            ROUND(
+
+                (
+                    SUM(m.marks_obtained)
+                    /
+                    NULLIF(
+                        SUM(e.total_marks),
+                        0
+                    )
+                ) * 100,
+
+                2
+
+            ) AS percentage,
+
+            ROUND(
+
+                (
+                    SUM(sa.present_days)
+                    /
+                    NULLIF(
+                        SUM(sa.total_classes),
+                        0
+                    )
+                ) * 100,
+
+                2
+
+            ) AS attendance_percentage
+
+        FROM students s
+
+        LEFT JOIN marks m
+            ON s.id = m.student_id
+
+        LEFT JOIN exams e
+            ON e.id = m.exam_id
+
+        LEFT JOIN subject_attendance sa
+            ON sa.student_id = s.id
+
+        WHERE 1=1
+    ";
+
+        $params = [];
+
+        if (!empty($courseId)) {
+
+            $sql .= " AND s.course_id = ? ";
+
+            $params[] = $courseId;
+        }
+
+        if (!empty($semesterId)) {
+
+            $sql .= " AND s.semester_id = ? ";
+
+            $params[] = $semesterId;
+        }
+
+        $sql .= "
+
+        GROUP BY s.id
+
+        ORDER BY percentage DESC
+
+        LIMIT " . (int)$limit;
+
+        $stmt =
+            $this->conn->prepare($sql);
+
+        $stmt->execute($params);
+
+        return
+            $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getStudentByStudentCode(
+        $studentCode
+    ) {
+        $sql = "
+
+        SELECT *
+
+        FROM students
+
+        WHERE student_id = ?
+
+        LIMIT 1
+    ";
+
+        $stmt =
+            $this->conn->prepare($sql);
+
+        $stmt->execute([
+            $studentCode
+        ]);
+
+        return
+            $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }

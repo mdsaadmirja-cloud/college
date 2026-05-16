@@ -470,4 +470,129 @@ class StudentPerformanceController
 
         redirectTo('manage-student-performance&deleted=1');
     }
+
+    public function studentLeaderboard()
+    {
+        /*
+    |--------------------------------------------------------------------------
+    | LOGIN CHECK
+    |--------------------------------------------------------------------------
+    */
+
+        if (!isset($_SESSION['user_id'])) {
+
+            redirectTo('login');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | STUDENT ONLY
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            strtolower($_SESSION['role'])
+            !== 'student'
+        ) {
+
+            redirectTo('dashboard');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | GET LOGGED-IN STUDENT
+    |--------------------------------------------------------------------------
+    */
+
+        $studentId =
+            $_SESSION['student_id'];
+
+        $student =
+            $this->model->getStudentByStudentCode(
+                $studentId
+            );
+
+        if (!$student) {
+
+            redirectTo('dashboard');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | LEADERBOARD DATA
+    |--------------------------------------------------------------------------
+    */
+
+        $overallToppers =
+            $this->model->getOverallToppers();
+
+        $semesterToppers =
+            $this->model->getSemesterToppers(
+                $student['semester_id']
+            );
+
+        include __DIR__ .
+            '/../views/performance/student_leaderboard.php';
+    }
+
+    public function adminLeaderboard()
+    {
+        /*
+    |--------------------------------------------------------------------------
+    | LOGIN CHECK
+    |--------------------------------------------------------------------------
+    */
+
+        if (!isset($_SESSION['user_id'])) {
+
+            redirectTo('login');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | ADMIN ONLY
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            strtolower($_SESSION['role'])
+            !== 'admin'
+        ) {
+
+            redirectTo('dashboard');
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | FILTERS
+    |--------------------------------------------------------------------------
+    */
+
+        $courseId =
+            $_GET['course_id'] ?? '';
+
+        $semesterId =
+            $_GET['semester_id'] ?? '';
+
+        /*
+    |--------------------------------------------------------------------------
+    | DATA
+    |--------------------------------------------------------------------------
+    */
+
+        $courses =
+            $this->model->getCourses();
+
+        $semesters =
+            $this->model->getSemesters();
+
+        $topPerformers =
+            $this->model->getTopPerformers(
+                $courseId,
+                $semesterId
+            );
+
+        include __DIR__ .
+            '/../views/performance/admin_leaderboard.php';
+    }
 }

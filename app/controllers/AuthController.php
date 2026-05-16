@@ -3,6 +3,7 @@ class AuthController
 {
     private $userModel;
 
+
     public function __construct($db)
     {
         $this->userModel = new UserModel($db);
@@ -47,6 +48,7 @@ class AuthController
 
         // ================= AUTHENTICATION =================
         $user = $this->userModel->authenticate($email, $password);
+        
 
         if (!$user) {
             header('Location: ' . BASE_URL . 'login&error=invalid_credentials');
@@ -58,8 +60,26 @@ class AuthController
         $_SESSION['user_name'] = $user['first_name'] ?? 'User';
         $_SESSION['email'] = $user['email'];
         $_SESSION['role'] = $user['role_name'];
-        $_SESSION['student_id'] = $user['student_id'] ?? null;
+        if (
+            strtolower($user['role_name'])
+            === 'student'
+        ) {
+            require_once __DIR__ .
+                '/../models/StudentPerformanceModel.php';
 
+            global $db;
+
+            $studentModel =
+                new StudentPerformanceModel($db);
+
+            $studentData =
+                $studentModel->getStudentByStudentCode(
+                    $user['student_id']
+                );
+
+            $_SESSION['student_id'] =
+                $user['student_id'] ?? null;
+        }
         // ================= REDIRECT =================
         header('Location: ' . BASE_URL . 'dashboard');
         exit();
