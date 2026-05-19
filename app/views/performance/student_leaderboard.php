@@ -38,35 +38,163 @@
 
         <!-- HERO SECTION -->
 
-        <div class="card border-0 shadow-sm mb-4"
-            style="
-                border-radius:24px;
-                background:
-                    linear-gradient(
-                        135deg,
-                        #f59e0b,
-                        #ef4444
-                    );
-            ">
+        <div class="card border-0 shadow-sm mb-4 leaderboard-card">
 
-            <div class="card-body p-5">
+            <div class="card-body text-center p-5">
 
-                <h1 class="fw-bold text-black mb-3">
+                <div class="leaderboard-content">
 
-                    ꧁ ༺ ♔ ༻  Student Leaderboard  ༺ ♔ ༻ ꧂
+                    <h1 class="leaderboard-title">
 
-                </h1>
+                        Student Leaderboard
 
-                <p class="text-white opacity-75 mb-0">
+                    </h1>
 
-                    Explore overall toppers and
-                    your semester top performers.
+                    <div class="divider-icons">
 
-                </p>
+                        ✦ ♔ ✦
+
+                    </div>
+
+                    <p class="leaderboard-text">
+
+                        Explore overall toppers and your semester top performers.
+
+                    </p>
+
+                </div>
 
             </div>
 
         </div>
+
+        <style>
+            .leaderboard-card {
+
+                position: relative;
+
+                border-radius: 30px;
+
+                overflow: hidden;
+
+                background:
+                    linear-gradient(135deg,
+                        #fffdf7,
+                        #fff7ed);
+
+                min-height: 260px;
+
+                display: flex;
+
+                align-items: center;
+
+                justify-content: center;
+
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+
+            }
+
+            /* Background Decorative Image */
+
+            .leaderboard-card::before {
+
+                content: '';
+
+                position: absolute;
+
+                inset: 0;
+
+                background-image:
+                    url('/college/public/assets/images/graduation-frame.png');
+
+                background-repeat: no-repeat;
+
+                background-position: center;
+
+                background-size: 85%;
+
+                opacity: 0.18;
+
+            }
+
+            /* Content */
+
+            .leaderboard-content {
+
+                position: relative;
+
+                z-index: 2;
+
+            }
+
+            /* Heading */
+
+            .leaderboard-title {
+
+                font-size: 58px;
+
+                font-weight: 900;
+
+                color: #000;
+
+                margin-bottom: 12px;
+
+                text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.08);
+
+            }
+
+            /* Divider */
+
+            .divider-icons {
+
+                font-size: 32px;
+
+                color: #d97706;
+
+                margin-bottom: 15px;
+
+                letter-spacing: 8px;
+
+            }
+
+            /* Paragraph */
+
+            .leaderboard-text {
+
+                font-size: 20px;
+
+                color: #333;
+
+                font-weight: 500;
+
+            }
+
+            /* Responsive */
+
+            @media(max-width:768px) {
+
+                .leaderboard-title {
+
+                    font-size: 34px;
+
+                }
+
+
+                .divider-icons {
+
+                    font-size: 22px;
+
+                }
+
+
+                .leaderboard-text {
+
+                    font-size: 15px;
+
+                }
+
+            }
+        </style>
 
         <!-- OVERALL TOPPERS -->
 
